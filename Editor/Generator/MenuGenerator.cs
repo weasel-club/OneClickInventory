@@ -86,8 +86,13 @@ namespace dog.miruku.inventory
                 {
                     if (component.GetType().Name == "ModularAvatarMenuInstallTarget")
                     {
+                        var installerField = component.GetType().GetField("installer");
+                        var targetInstaller = installerField.GetValue(component) as ModularAvatarMenuInstaller;
+
+                        if (targetInstaller != menuInstaller) continue;
+
                         // Set serialized field "installer" to the new installer
-                        component.GetType().GetField("installer")?.SetValue(component, newMenuInstaller);
+                        installerField.SetValue(component, newMenuInstaller);
                         EditorUtility.SetDirty(component);
                     }
                 }
