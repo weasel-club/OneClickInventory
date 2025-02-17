@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
@@ -39,7 +40,6 @@ namespace dog.miruku.inventory.runtime
 
         [FormerlySerializedAs("_closetName")] [SerializeField]
         private string _name;
-
         public string Name => _name;
 
         [SerializeField] private Texture2D _customIcon;
@@ -109,6 +109,21 @@ namespace dog.miruku.inventory.runtime
         private void Reset()
         {
             _name = gameObject.name;
+        }
+
+        private void OnValidate()
+        {
+            if (!IsValidName(_name))
+            {
+                Debug.LogError($"[One-Click Inventory] 아이템의 이름에 사용할 수 없는 문자가 포함되어 있습니다: {_name}");
+                Debug.LogError($"[One-Click Inventory] 아이템의 이름에 [<>:\"/\\|?*]는 사용할 수 없습니다.");
+                _name = "Invalid_Name";
+            }
+        }
+
+        private bool IsValidName(string input)
+        {
+            return !string.IsNullOrWhiteSpace(input) && !Regex.IsMatch(input, "[<>:\"/\\|?*]");
         }
     }
 }
