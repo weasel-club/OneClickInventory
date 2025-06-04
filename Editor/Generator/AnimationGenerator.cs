@@ -209,6 +209,7 @@ namespace dog.miruku.inventory
         {
             if (node.Value.ParameterDriverBindings.Count() == 0) return;
             var driver = state.AddStateMachineBehaviour<VRCAvatarParameterDriver>();
+            if (!driver) return;
             driver.parameters = new List<VRC_AvatarParameterDriver.Parameter>();
             driver.parameters.AddRange(node.Value.ParameterDriverBindings.Select(e => e.parameter));
         }
@@ -498,6 +499,7 @@ namespace dog.miruku.inventory
                 }
 
                 var driver = state.AddStateMachineBehaviour<VRCAvatarParameterDriver>();
+                if (!driver) continue;
                 driver.parameters = new List<VRC_AvatarParameterDriver.Parameter>()
                 {
                     new VRC_AvatarParameterDriver.Parameter()
