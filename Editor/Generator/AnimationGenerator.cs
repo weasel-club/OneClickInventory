@@ -83,7 +83,7 @@ namespace dog.miruku.inventory
             var clip = new AnimationClip();
             if (enabledObjects != null)
             {
-                var enabledKeys = new Keyframe[] {new(0.0f, 1f)};
+                var enabledKeys = new Keyframe[] { new(0.0f, 1f) };
                 foreach (var e in enabledObjects.Where(e => Util.IsInAvatar(avatar, e.transform)))
                 {
                     var curve = new AnimationCurve(enabledKeys);
@@ -94,7 +94,7 @@ namespace dog.miruku.inventory
 
             if (disabledObjects != null)
             {
-                var disabledKeys = new Keyframe[] {new(0.0f, 0f)};
+                var disabledKeys = new Keyframe[] { new(0.0f, 0f) };
                 foreach (var e in disabledObjects.Where(e => Util.IsInAvatar(avatar, e.transform)))
                 {
                     var curve = new AnimationCurve(disabledKeys);
@@ -130,7 +130,7 @@ namespace dog.miruku.inventory
                         };
                         var property = $"m_Materials.Array.data[{i}]";
                         var curve = EditorCurveBinding.PPtrCurve(objectPath, rendererType, property);
-                        AnimationUtility.SetObjectReferenceCurve(clip, curve, new[] {keyframe});
+                        AnimationUtility.SetObjectReferenceCurve(clip, curve, new[] { keyframe });
                     }
                 }
 
@@ -460,6 +460,11 @@ namespace dog.miruku.inventory
                 transition.AddCondition(AnimatorConditionMode.If, 0, GetSyncedParameterName(parameterName));
                 transition.AddCondition(AnimatorConditionMode.If, 0, "IsLocal");
                 var driver = state.AddStateMachineBehaviour<VRCAvatarParameterDriver>();
+                if (!driver) continue;
+                if (driver.parameters == null)
+                {
+                    driver.parameters = new List<VRC_AvatarParameterDriver.Parameter>();
+                }
                 foreach (var (name, value) in Encode(parameterName, bits, i))
                 {
                     driver.parameters.Add(new VRC_AvatarParameterDriver.Parameter()
