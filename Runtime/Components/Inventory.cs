@@ -12,7 +12,7 @@ namespace dog.miruku.inventory.runtime
     {
         public SkinnedMeshRenderer renderer;
         public string name;
-        public int value;
+        public float value;
     }
 
     [Serializable]
@@ -37,7 +37,8 @@ namespace dog.miruku.inventory.runtime
 
         public bool InstallMenuInRoot => _installMenuInRoot;
 
-        [FormerlySerializedAs("_closetName")] [SerializeField]
+        [FormerlySerializedAs("_closetName")]
+        [SerializeField]
         private string _name;
 
         public string Name => _name;
@@ -67,7 +68,7 @@ namespace dog.miruku.inventory.runtime
         [SerializeField] private List<GameObject> _additionalObjects = new();
 
         public IEnumerable<GameObject> GameObjects =>
-            new[] {gameObject}.Concat(_additionalObjects.Where(e => e != null));
+            new[] { gameObject }.Concat(_additionalObjects.Where(e => e != null));
 
         [SerializeField] private List<AnimationClip> _additionalAnimations = new();
 
