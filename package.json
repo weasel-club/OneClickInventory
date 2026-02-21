@@ -8,7 +8,7 @@
     "email": "cstria0106@gmail.com",
     "url": "https://github.com/cstria0106"
   },
-  "description": "Create inventory in VRChat with one click",
+  "description": "VRChat inventory system",
   "unity": "2019.4",
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "2.0.0"
