@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class CachedResource
     {

@@ -1,8 +1,8 @@
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using UnityEditor;
 using UnityEngine;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     [CustomEditor(typeof(InventoryMenuInstaller))]
     [CanEditMultipleObjects]
@@ -20,7 +20,7 @@ namespace dog.miruku.inventory
         {
             EditorGUILayout.LabelField(
                 "이 컴포넌트를 Menu Item 혹은 Menu Item Group와 함께 넣어두면 메뉴 생성 시 해당 인벤토리 혹은 아이템의 서브 메뉴로 설치됩니다.",
-                new GUIStyle(EditorStyles.label) {wordWrap = true}
+                new GUIStyle(EditorStyles.label) { wordWrap = true }
             );
 
             EditorGUILayout.Space();

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDKBase;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class AnimationGenerator
     {

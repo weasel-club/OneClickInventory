@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEditor;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using VRC.SDK3.Avatars.Components;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     [CustomEditor(typeof(InventoryConfig))]
     [CanEditMultipleObjects]
@@ -34,7 +34,7 @@ namespace dog.miruku.inventory
         {
             EditorGUILayout.LabelField(
                 "이 컴포넌트로 인벤토리 루트 메뉴의 속성을 설정할 수 있습니다.",
-                new GUIStyle(EditorStyles.label) {wordWrap = true}
+                new GUIStyle(EditorStyles.label) { wordWrap = true }
             );
             EditorGUILayout.Space();
 

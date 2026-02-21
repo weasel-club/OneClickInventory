@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using UnityEditor;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class L
     {

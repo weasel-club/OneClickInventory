@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public class AvatarHierarchyFolding
     {
@@ -33,7 +33,7 @@ namespace dog.miruku.inventory
                 folding.NodesShow[node.Key] = EditorGUILayout.BeginFoldoutHeaderGroup(folding.NodesShow[node.Key],
                     GUIContent.none,
                     new GUIStyle(EditorStyles.foldoutHeader)
-                        {padding = new RectOffset(0, 0, 0, 0), stretchWidth = false});
+                    { padding = new RectOffset(0, 0, 0, 0), stretchWidth = false });
             }
 
             EditorGUI.BeginDisabledGroup(true);

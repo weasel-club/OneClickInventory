@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public class IconUtil
     {
@@ -48,7 +48,7 @@ namespace dog.miruku.inventory
             {
                 renderer.updateWhenOffscreen = true; // Force update for SkinnedMeshRenderer
             }
-            
+
             var boundList = cloned.GetComponentsInChildren<Renderer>().Select<Renderer, Bounds?>(e =>
             {
                 if (e.TryGetComponent(out SkinnedMeshRenderer renderer))

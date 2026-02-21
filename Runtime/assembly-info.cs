@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("dog.miruku.inventory")]
+[assembly: InternalsVisibleTo("Goorm.OneClickInventory")]

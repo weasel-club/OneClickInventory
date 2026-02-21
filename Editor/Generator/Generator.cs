@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
 using UnityEditor.Animations;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class Generator
     {
@@ -99,7 +99,7 @@ namespace dog.miruku.inventory
             }
 
             // Remove Inventory components
-            var types = new[] {typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryConfig)};
+            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryConfig) };
             foreach (var type in types)
             {
                 foreach (var component in avatar.GetComponentsInChildren(type, true))

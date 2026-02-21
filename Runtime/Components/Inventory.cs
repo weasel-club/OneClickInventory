@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace dog.miruku.inventory.runtime
+namespace Goorm.OneClickInventory.runtime
 {
     [Serializable]
     public struct SetBlendShapeBinding

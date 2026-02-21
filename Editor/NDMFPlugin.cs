@@ -1,10 +1,10 @@
 using nadena.dev.ndmf;
 using UnityEngine;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 
-[assembly: ExportsPlugin(typeof(dog.miruku.inventory.NDMFPlugin))]
+[assembly: ExportsPlugin(typeof(Goorm.OneClickInventory.NDMFPlugin))]
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public class NDMFPlugin : Plugin<NDMFPlugin>
     {

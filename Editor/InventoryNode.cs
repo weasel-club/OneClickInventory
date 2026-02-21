@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public class InventoryNode
     {

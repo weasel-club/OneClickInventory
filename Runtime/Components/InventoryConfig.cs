@@ -1,7 +1,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace dog.miruku.inventory.runtime
+namespace Goorm.OneClickInventory.runtime
 {
     [DisallowMultipleComponent]
     [AddComponentMenu("One-Click Inventory/Inventory Config")]

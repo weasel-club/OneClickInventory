@@ -1,8 +1,8 @@
 using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using UnityEditor;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class Menu
     {

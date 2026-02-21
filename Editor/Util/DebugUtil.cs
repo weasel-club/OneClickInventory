@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public class DebugUtil
     {

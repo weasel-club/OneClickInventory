@@ -1,13 +1,13 @@
 using System;
 using UnityEditor;
 using UnityEngine;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using System.Linq;
 using nadena.dev.modular_avatar.core;
 using UnityEditorInternal;
 using VRC.SDKBase;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     [CustomEditor(typeof(Inventory))]
     [CanEditMultipleObjects]
@@ -45,7 +45,7 @@ namespace dog.miruku.inventory
 
         private void OnEnable()
         {
-            Inventory = (Inventory) target;
+            Inventory = (Inventory)target;
             Name = serializedObject.FindProperty("_name");
 
             IsUnique = serializedObject.FindProperty("_isUnique");
@@ -182,7 +182,7 @@ namespace dog.miruku.inventory
                     {
                         var element = _parameterDriverBindingsList.serializedProperty.GetArrayElementAtIndex(index);
                         var type = element.FindPropertyRelative("parameter.type").enumValueIndex;
-                        switch ((VRC_AvatarParameterDriver.ChangeType) type)
+                        switch ((VRC_AvatarParameterDriver.ChangeType)type)
                         {
                             case VRC_AvatarParameterDriver.ChangeType.Set:
                                 return EditorGUIUtility.singleLineHeight * 2;
@@ -223,7 +223,7 @@ namespace dog.miruku.inventory
         {
             EditorGUILayout.LabelField(
                 "이 컴포넌트가 있는 오브젝트는 인벤토리 혹은 아이템으로 설정됩니다. 속성 이름에 마우스를 대서 설명을 볼 수 있습니다.",
-                new GUIStyle(EditorStyles.label) {wordWrap = true}
+                new GUIStyle(EditorStyles.label) { wordWrap = true }
             );
             EditorGUILayout.Space();
 
@@ -250,7 +250,7 @@ namespace dog.miruku.inventory
             AssetPreview.GetAssetPreview(Inventory.Icon);
             EditorGUILayout.LabelField(L.Get("customIcon"));
             GUILayout.BeginHorizontal();
-            Inventory.Icon = (Texture2D) EditorGUILayout.ObjectField(Inventory.Icon, typeof(Texture2D), false,
+            Inventory.Icon = (Texture2D)EditorGUILayout.ObjectField(Inventory.Icon, typeof(Texture2D), false,
                 GUILayout.Width(100), GUILayout.Height(100));
             if (GUILayout.Button(L.Get("generateIcon")))
             {
@@ -327,7 +327,7 @@ namespace dog.miruku.inventory
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField(
                         "Blend Shape를 변경합니다. Shrink 블렌드 셰이프나 Foot Heel(까치발) 블렌드 셰이프과 함께 사용하는 옷에 유용합니다.",
-                        new GUIStyle(EditorStyles.label) {wordWrap = true, fontSize = 11});
+                        new GUIStyle(EditorStyles.label) { wordWrap = true, fontSize = 11 });
                     EditorGUILayout.Space();
                     _blendShapesToChangeList.DoLayoutList();
                 }
@@ -339,7 +339,7 @@ namespace dog.miruku.inventory
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("매터리얼을 변경합니다. 옷의 색상을 선택하게 하고 싶거나, 액세서리의 색상을 옷과 매칭되게 하는 등에 유용합니다.",
-                        new GUIStyle(EditorStyles.label) {wordWrap = true, fontSize = 11});
+                        new GUIStyle(EditorStyles.label) { wordWrap = true, fontSize = 11 });
                     EditorGUILayout.Space();
                     _materialsToReplaceList.DoLayoutList();
                 }
@@ -369,7 +369,7 @@ namespace dog.miruku.inventory
                             "체크하면 이 아이템이 월드 간에 저장됩니다."));
                 }
 
-                if(Inventory.TryGetComponent<ModularAvatarMenuInstaller>(out _))
+                if (Inventory.TryGetComponent<ModularAvatarMenuInstaller>(out _))
                 {
                     EditorGUILayout.PropertyField(IntegrateMenuInstaller,
                         new GUIContent(L.Get("integrateMenuInstaller"),

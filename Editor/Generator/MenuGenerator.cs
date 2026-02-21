@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using dog.miruku.inventory.runtime;
+using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
 using nadena.dev.modular_avatar.core.menu;
 using UnityEditor;
@@ -7,7 +7,7 @@ using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
 
-namespace dog.miruku.inventory
+namespace Goorm.OneClickInventory
 {
     public abstract class MenuGenerator
     {
