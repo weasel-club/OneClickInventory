@@ -1,52 +1,145 @@
 name: Create Release
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+    workflow_dispatch:
+    push:
+        tags:
+            - "[0-9]+.[0-9]+.[0-9]+"
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    create-release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-      - name: Set tag as version in package.json
-        run: |
-          VERSION=$(echo "${{ github.ref_name }}")
-          echo "Updating package.json version to $VERSION"
-          jq --arg version "$VERSION" '.version = $version' package.json > package.json.tmp
-          cp package.json.tmp package.json
+            - name: Set tag as version in package.json
+              run: |
+                  VERSION=$(echo "${{ github.ref_name }}")
+                  echo "Updating package.json version to $VERSION"
+                  jq --arg version "$VERSION" '.version = $version' package.json > package.json.tmp
+                  cp package.json.tmp package.json
 
-      - name: Make zip
-        run: |
-          mkdir output
-          zip -r output/release.zip . -x .git/\* -x .github/\* -x output/\*
+            - name: Make zip
+              run: |
+                  VERSION=$(echo "${{ github.ref_name }}")
+                  mkdir output
+                  zip -r "output/OneClickInventory-${VERSION}.zip" . -x .git/* -x .github/* -x output/*
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ./output/release.zip
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          name: OneClickInventory-${{ github.ref_name }}.zip
+            - name: Make unitypackage
+              run: |
+                  python3 - <<'PY'
+                  from pathlib import Path
+                  import shutil
+                  import hashlib
 
-      - name: Trigger packages workflow
-        uses: convictional/trigger-workflow-and-wait@v1.6.1
-        with:
-          owner: cstria0106
-          repo: vpm-repos
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          workflow_file_name: build-listing.yml
-          ref: main
-          trigger_workflow: true
-          wait_workflow: true
+                  project_root = Path(".")
+                  output_dir = project_root / "output"
+                  work_dir = output_dir / "unitypackage"
 
-      - name: Trigger packages workflow
-        uses: convictional/trigger-workflow-and-wait@v1.6.1
-        with:
-          owner: weasel-club
-          repo: packages
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          workflow_file_name: build-listing.yml
-          ref: main
-          trigger_workflow: true
-          wait_workflow: true
+                  include_roots = [
+                      Path("Editor"),
+                      Path("Runtime"),
+                      Path("package.json"),
+                      Path("README.md"),
+                      Path("LICENSE"),
+                  ]
+                  target_root = Path("Assets/OneClickInventory")
+
+                  def read_guid(meta_path: Path) -> str:
+                      for line in meta_path.read_text(encoding="utf-8").splitlines():
+                          if line.startswith("guid: "):
+                              return line.split("guid: ", 1)[1].strip()
+                      raise RuntimeError(f"guid not found in {meta_path}")
+
+                  def add_asset(asset_path: Path, target_path: Path) -> None:
+                      meta_path = asset_path.parent / f"{asset_path.name}.meta"
+                      if not meta_path.exists():
+                          raise RuntimeError(f"Missing meta file: {meta_path}")
+
+                      guid = read_guid(meta_path)
+                      guid_dir = work_dir / guid
+                      guid_dir.mkdir(parents=True, exist_ok=True)
+
+                      if asset_path.is_file():
+                          shutil.copy2(asset_path, guid_dir / "asset")
+
+                      shutil.copy2(meta_path, guid_dir / "asset.meta")
+                      (guid_dir / "pathname").write_text(target_path.as_posix(), encoding="utf-8")
+
+                  def add_virtual_folder(target_path: Path) -> None:
+                      # Create a stable synthetic folder meta for the package root.
+                      guid = hashlib.md5(target_path.as_posix().encode("utf-8")).hexdigest()
+                      guid_dir = work_dir / guid
+                      guid_dir.mkdir(parents=True, exist_ok=True)
+
+                      folder_meta = (
+                          "fileFormatVersion: 2\n"
+                          f"guid: {guid}\n"
+                          "folderAsset: yes\n"
+                          "DefaultImporter:\n"
+                          "  externalObjects: {}\n"
+                          "  userData: \n"
+                          "  assetBundleName: \n"
+                          "  assetBundleVariant: \n"
+                      )
+                      (guid_dir / "asset.meta").write_text(folder_meta, encoding="utf-8")
+                      (guid_dir / "pathname").write_text(target_path.as_posix(), encoding="utf-8")
+
+                  shutil.rmtree(work_dir, ignore_errors=True)
+                  work_dir.mkdir(parents=True, exist_ok=True)
+
+                  add_virtual_folder(target_root)
+
+                  for root in include_roots:
+                      source = project_root / root
+                      if not source.exists():
+                          continue
+
+                      if source.is_file():
+                          add_asset(source, target_root / source.name)
+                          continue
+
+                      stack = [source]
+                      while stack:
+                          current = stack.pop()
+                          rel_path = current.relative_to(project_root)
+                          add_asset(current, target_root / rel_path)
+
+                          child_dirs = sorted([p for p in current.iterdir() if p.is_dir()], reverse=True)
+                          stack.extend(child_dirs)
+
+                          for file_path in sorted([p for p in current.iterdir() if p.is_file() and p.suffix != ".meta"]):
+                              rel_file = file_path.relative_to(project_root)
+                              add_asset(file_path, target_root / rel_file)
+
+                  # Build an uncompressed tar first (archtemp.tar) and gzip it with level 1.
+                  # This closely matches legacy unitypackage files generated by Unity tooling.
+                  PY
+
+                  chmod -R 777 output/unitypackage
+                  cd output/unitypackage
+                  tar -cf ../archtemp.tar *
+                  cd ..
+                  gzip -1 -f archtemp.tar
+                  mv archtemp.tar.gz "OneClickInventory-${{ github.ref_name }}.unitypackage"
+
+            - name: Release
+              if: github.event_name == 'push'
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: |
+                      ./output/OneClickInventory-${{ github.ref_name }}.zip
+                      ./output/OneClickInventory-${{ github.ref_name }}.unitypackage
+                  token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+                  name: OneClickInventory-${{ github.ref_name }}
+
+            - name: Trigger packages workflow
+              if: github.event_name == 'push'
+              uses: convictional/trigger-workflow-and-wait@v1.6.1
+              with:
+                  owner: weasel-club
+                  repo: packages
+                  github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+                  workflow_file_name: build-listing.yml
+                  ref: main
+                  trigger_workflow: true
+                  wait_workflow: true
