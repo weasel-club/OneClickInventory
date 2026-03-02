@@ -1,0 +1,20 @@
+name: Notify VRChat Submodule Sync
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch submodule update event
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          if [ -z "${PAT}" ]; then
+            echo "PERSONAL_ACCESS_TOKEN is missing"
+            exit 1
+          fi
+          curl -sSf -X POST             -H "Accept: application/vnd.github+json"             -H "Authorization: Bearer ${PAT}"             https://api.github.com/repos/weasel-club/VRChat/dispatches             -d '{"event_type":"submodule-updated","client_payload":{"repo":"${{ github.repository }}","submodule_path":"assets/OneClickInventory","sha":"${{ github.sha }}"}}'
