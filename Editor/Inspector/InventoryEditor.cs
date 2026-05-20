@@ -33,6 +33,8 @@ namespace Goorm.OneClickInventory
 
         private ReorderableList _blendShapesToChangeList;
         private ReorderableList _materialsToReplaceList;
+        private string _immediateTooltip;
+
         private void OnEnable()
         {
             Inventory = (Inventory)target;
@@ -157,6 +159,7 @@ namespace Goorm.OneClickInventory
 
         public override void OnInspectorGUI()
         {
+            _immediateTooltip = null;
             InventoryEditorUtil.Banner();
 
             var avatar = Util.FindAvatar(Inventory.transform.parent);
@@ -178,6 +181,7 @@ namespace Goorm.OneClickInventory
             DrawAvatarSection(node);
             EditorGUILayout.Space(12f);
             InventoryEditorUtil.Footer(true);
+            DrawImmediateTooltip();
 
             serializedObject.ApplyModifiedProperties();
             DisableOtherDefaults(node);
@@ -472,18 +476,60 @@ namespace Goorm.OneClickInventory
         {
             var content = Content(contentKey);
             content.image = LoadEditorIcon(iconNames);
+            var tooltip = content.tooltip;
+            content.tooltip = null;
             var hasComponent = Inventory.TryGetComponent<T>(out _);
+            var clicked = false;
 
             using (new EditorGUI.DisabledScope(!allowMultiple && hasComponent))
             {
-                if (!GUI.Button(rect, content))
-                {
-                    return;
-                }
+                clicked = GUI.Button(rect, content);
             }
+
+            RegisterImmediateTooltip(rect, tooltip);
+            if (!clicked) return;
 
             Undo.AddComponent<T>(Inventory.gameObject);
             EditorUtility.SetDirty(Inventory.gameObject);
+        }
+
+        private void RegisterImmediateTooltip(Rect rect, string tooltip)
+        {
+            if (string.IsNullOrEmpty(tooltip) || !rect.Contains(Event.current.mousePosition)) return;
+
+            _immediateTooltip = tooltip;
+            Repaint();
+        }
+
+        private void DrawImmediateTooltip()
+        {
+            if (string.IsNullOrEmpty(_immediateTooltip) || Event.current.type != EventType.Repaint) return;
+
+            var content = new GUIContent(_immediateTooltip);
+            var style = new GUIStyle(EditorStyles.wordWrappedLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 13,
+                normal = { textColor = Color.white },
+                wordWrap = true,
+                padding = new RectOffset(14, 14, 10, 10)
+            };
+            const float cursorOffset = 18f;
+            const float screenPadding = 8f;
+            const float maxWidth = 380f;
+            const float minWidth = 220f;
+            var width = Mathf.Clamp(style.CalcSize(content).x + style.padding.horizontal, minWidth, maxWidth);
+            var height = style.CalcHeight(content, width) + style.padding.vertical;
+            var mousePosition = Event.current.mousePosition;
+            var x = Mathf.Min(mousePosition.x + cursorOffset, EditorGUIUtility.currentViewWidth - width - screenPadding);
+            var y = mousePosition.y + cursorOffset;
+            var rect = new Rect(Mathf.Max(screenPadding, x), y, width, height);
+
+            var backgroundColor = EditorGUIUtility.isProSkin
+                ? new Color(0.12f, 0.12f, 0.12f, 0.96f)
+                : new Color(0.18f, 0.18f, 0.18f, 0.96f);
+            EditorGUI.DrawRect(rect, backgroundColor);
+            GUI.Label(rect, content, style);
         }
 
         private static Texture LoadEditorIcon(params string[] iconNames)
