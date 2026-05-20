@@ -19,8 +19,10 @@ namespace Goorm.OneClickInventory
             get => _language ?? EditorPrefs.GetString("one-click-inventory.language", FALLBACK_LANGUAGE);
             set
             {
+                if (_language == value) return;
                 _language = value;
                 EditorPrefs.SetString("one-click-inventory.language", _language);
+                Cache.Clear();
                 Preload(_language);
             }
         }
