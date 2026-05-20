@@ -49,11 +49,17 @@ namespace Goorm.OneClickInventory
 
         private static void CopyAnimationClip(AnimationClip from, AnimationClip to)
         {
-            var curves = AnimationUtility.GetCurveBindings(from).ToList();
-            curves.AddRange(AnimationUtility.GetObjectReferenceCurveBindings(from));
-            foreach (var curve in curves)
+            foreach (var curve in AnimationUtility.GetCurveBindings(from))
             {
                 to.SetCurve(curve.path, curve.type, curve.propertyName, AnimationUtility.GetEditorCurve(from, curve));
+            }
+
+            foreach (var curve in AnimationUtility.GetObjectReferenceCurveBindings(from))
+            {
+                AnimationUtility.SetObjectReferenceCurve(
+                    to,
+                    curve,
+                    AnimationUtility.GetObjectReferenceCurve(from, curve));
             }
         }
 
@@ -115,12 +121,20 @@ namespace Goorm.OneClickInventory
             if (setMaterials != null)
                 foreach (var e in setMaterials.Where(e => Util.IsInAvatar(avatar, e.renderer.transform)))
                 {
+                    var rendererType = e.renderer is SkinnedMeshRenderer ? typeof(SkinnedMeshRenderer)
+                        : e.renderer is MeshRenderer ? typeof(MeshRenderer) : null;
+                    if (rendererType == null)
+                    {
+                        Debug.LogWarning(
+                            $"OneClickInventory skipped material replacement for unsupported renderer type: {e.renderer.GetType().Name}",
+                            e.renderer);
+                        continue;
+                    }
+
                     var objectPath = GetRelativePath(e.renderer.transform, avatar.transform);
                     var indexes = e.renderer.sharedMaterials.Select((m, i) => (m, i))
                         .Where(m => e.from == m.m)
                         .Select(m => m.i).ToList();
-                    var rendererType = e.renderer is SkinnedMeshRenderer ? typeof(SkinnedMeshRenderer)
-                        : e.renderer is MeshRenderer ? typeof(MeshRenderer) : null;
                     foreach (var i in indexes)
                     {
                         var keyframe = new ObjectReferenceKeyframe()
@@ -140,8 +154,7 @@ namespace Goorm.OneClickInventory
                     CopyAnimationClip(e, clip);
                 }
 
-            var path = AssetUtil.GetPath($"Animations/{key}.anim");
-            AssetDatabase.CreateAsset(clip, path);
+            AssetUtil.CreateAsset(clip, $"Animations/{key}.anim");
             return clip;
         }
 
@@ -276,7 +289,7 @@ namespace Goorm.OneClickInventory
         private static AnimatorController GenerateNonUniqueAnimatorController(InventoryNode node,
             AnimationClip enabledClip, AnimationClip disabledClip)
         {
-            var path = AssetUtil.GetPath($"Controllers/{node.Key}/Toggle.controller");
+            var path = AssetUtil.GetEmptyPath($"Controllers/{node.Key}/Toggle.controller");
             var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             controller.RemoveLayer(0);
             controller.AddLayer(node.Key);
@@ -342,7 +355,7 @@ namespace Goorm.OneClickInventory
         private static AnimatorController GenerateUniqueAnimatorController(InventoryNode node,
             Dictionary<InventoryNode, AnimationClip> clips, AnimationClip disableAllClip)
         {
-            var path = AssetUtil.GetPath($"Controllers/{node.Key}.controller");
+            var path = AssetUtil.GetEmptyPath($"Controllers/{node.Key}.controller");
             var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             controller.RemoveLayer(0);
             controller.AddLayer(node.Key);
