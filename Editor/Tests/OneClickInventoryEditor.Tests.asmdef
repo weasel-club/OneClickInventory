@@ -1,0 +1,38 @@
+{
+    "name": "OneClickInventoryEditor.Tests",
+    "rootNamespace": "Goorm.OneClickInventory.Tests",
+    "references": [
+        "OneClickInventory",
+        "OneClickInventoryEditor",
+        "nadena.dev.modular-avatar.core",
+        "nadena.dev.ndmf",
+        "VRC.SDK3A",
+        "VRC.SDKBase",
+        "VRC.SDK3A.Editor",
+        "VRC.SDKBase.Editor",
+        "nadena.dev.ndmf.runtime",
+        "GUID:67cc4cb7839cd3741b63733d5adf0442",
+        "GUID:ed88f634f22f87443b6d34bb57c93fbe",
+        "GUID:db48663b319a020429e3b1265f97aff1",
+        "GUID:dc5cab6c932db3247aab9f50c5f3bd5f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "VRCSDKBase.dll",
+        "VRCSDK3A.dll",
+        "VRCSDKBase-Editor.dll",
+        "VRCSDK3A-Editor.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
