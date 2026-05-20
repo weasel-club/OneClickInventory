@@ -33,11 +33,6 @@ namespace Goorm.OneClickInventory
 
         private ReorderableList _blendShapesToChangeList;
         private ReorderableList _materialsToReplaceList;
-        static InventoryEditor()
-        {
-            EditorApplication.hierarchyWindowItemOnGUI += DrawIconOnWindowItem;
-        }
-
         private void OnEnable()
         {
             Inventory = (Inventory)target;
@@ -158,24 +153,6 @@ namespace Goorm.OneClickInventory
         private static GUIContent Content(string key, string tooltipKey)
         {
             return InventoryEditorUtil.Content(key, tooltipKey);
-        }
-
-        private static void DrawIconOnWindowItem(int instanceID, Rect rect)
-        {
-            var gameObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
-            if (gameObject == null)
-            {
-                return;
-            }
-
-            if (gameObject.TryGetComponent(out Inventory inventory))
-            {
-                var size = rect.height;
-                var labelRect = new Rect(rect.xMax - size, rect.yMin, size, size);
-
-                GUI.DrawTexture(labelRect,
-                    CachedResource.Load<Texture2D>(inventory.Default ? "InventoryActive.png" : "Inventory.png"));
-            }
         }
 
         public override void OnInspectorGUI()
