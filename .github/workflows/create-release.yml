@@ -35,6 +35,7 @@ jobs:
                 "package_name": "OneClickInventory",
                 "output_file_name": "OneClickInventory-${{ github.ref_name }}.unitypackage",
                 "include_roots": ["Editor", "Runtime", "package.json", "README.md", "LICENSE"],
+                "exclude_paths": ["Editor/Tests"],
                 "target_root": "Assets/OneClickInventory"
               }
             ]
