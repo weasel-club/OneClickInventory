@@ -306,6 +306,8 @@ namespace Goorm.OneClickInventory
                 EditorGUILayout.PropertyField(IntegrateMenuInstaller, Content("integrateMenuInstaller"));
             }
 
+            DrawItemActionButtons();
+
             if (!InventoryEditorUtil.ShowLegacyOptions) return;
 
             EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
@@ -314,6 +316,59 @@ namespace Goorm.OneClickInventory
             DrawMaterialSection();
             EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
             EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
+        }
+
+        private void DrawItemActionButtons()
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(Content("itemActions"), InventoryEditorUtil.HeaderStyle);
+
+            const float gap = 2f;
+            var rect = EditorGUILayout.GetControlRect(false, 28f);
+            var buttonWidth = (rect.width - gap) / 2f;
+            var shapeChangerRect = new Rect(rect.x, rect.y, buttonWidth, rect.height);
+            var objectToggleRect = new Rect(shapeChangerRect.xMax + gap, rect.y, buttonWidth, rect.height);
+            var iconSize = EditorGUIUtility.GetIconSize();
+            EditorGUIUtility.SetIconSize(new Vector2(16f, 16f));
+
+            DrawAddComponentButton<ModularAvatarShapeChanger>(shapeChangerRect, "addShapeChangerButton",
+                "SkinnedMeshRenderer Icon", "MeshRenderer Icon");
+            DrawAddComponentButton<ModularAvatarObjectToggle>(objectToggleRect, "addObjectToggleButton",
+                "GameObject Icon", "Prefab Icon");
+
+            EditorGUIUtility.SetIconSize(iconSize);
+        }
+
+        private void DrawAddComponentButton<T>(Rect rect, string contentKey, params string[] iconNames) where T : Component
+        {
+            var content = Content(contentKey);
+            content.image = LoadEditorIcon(iconNames);
+            var hasComponent = Inventory.TryGetComponent<T>(out _);
+
+            using (new EditorGUI.DisabledScope(hasComponent))
+            {
+                if (!GUI.Button(rect, content))
+                {
+                    return;
+                }
+            }
+
+            Undo.AddComponent<T>(Inventory.gameObject);
+            EditorUtility.SetDirty(Inventory.gameObject);
+        }
+
+        private static Texture LoadEditorIcon(params string[] iconNames)
+        {
+            foreach (var iconName in iconNames)
+            {
+                var image = EditorGUIUtility.IconContent(iconName).image;
+                if (image != null)
+                {
+                    return image;
+                }
+            }
+
+            return null;
         }
 
         private void DrawBlendShapeSection()
