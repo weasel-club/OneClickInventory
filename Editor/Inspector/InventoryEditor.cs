@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
@@ -13,7 +14,9 @@ namespace Goorm.OneClickInventory
     [CanEditMultipleObjects]
     public class InventoryEditor : Editor
     {
+        private const string DefaultInventoryIconFolderGuid = "85e63a01589fc6845ae77bd4ca0c8d2d";
         private static bool _showStructurePreview = true;
+        private static Texture2D[] _defaultInventoryIcons;
 
         private Inventory Inventory { get; set; }
         private SerializedProperty Name { get; set; }
@@ -215,12 +218,121 @@ namespace Goorm.OneClickInventory
             EditorGUILayout.BeginHorizontal();
             Inventory.Icon = (Texture2D)EditorGUILayout.ObjectField(Inventory.Icon, typeof(Texture2D), false,
                 GUILayout.Width(100), GUILayout.Height(100));
-            if (GUILayout.Button(Content("generateIcon"), GUILayout.Height(28)))
+
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(Content("generateIcon"), GUILayout.Width(120), GUILayout.Height(28)))
             {
                 Inventory.Icon = IconUtil.Generate(node);
             }
 
+            DrawDefaultIconPickerButton();
+            GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawDefaultIconPickerButton()
+        {
+            using (new EditorGUI.DisabledScope(GetDefaultInventoryIcons().Length == 0))
+            {
+                if (!GUILayout.Button(Content("selectDefaultIcon"), GUILayout.Width(140), GUILayout.Height(28))) return;
+
+                var buttonRect = GUILayoutUtility.GetLastRect();
+                PopupWindow.Show(buttonRect, new DefaultInventoryIconPopup(GetDefaultInventoryIcons(), icon =>
+                {
+                    Undo.RecordObject(Inventory, "Select Default Inventory Icon");
+                    Inventory.Icon = icon;
+                    EditorUtility.SetDirty(Inventory);
+                }));
+            }
+        }
+
+        private static Texture2D[] GetDefaultInventoryIcons()
+        {
+            if (_defaultInventoryIcons != null) return _defaultInventoryIcons;
+
+            var folderPath = AssetDatabase.GUIDToAssetPath(DefaultInventoryIconFolderGuid);
+            if (string.IsNullOrEmpty(folderPath))
+            {
+                _defaultInventoryIcons = Array.Empty<Texture2D>();
+                return _defaultInventoryIcons;
+            }
+
+            _defaultInventoryIcons = AssetDatabase.FindAssets("t:Texture2D", new[] { folderPath })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .OrderBy(Path.GetFileNameWithoutExtension)
+                .Select(AssetDatabase.LoadAssetAtPath<Texture2D>)
+                .Where(icon => icon != null)
+                .ToArray();
+            return _defaultInventoryIcons;
+        }
+
+        private class DefaultInventoryIconPopup : PopupWindowContent
+        {
+            private const float IconButtonSize = 44f;
+            private const float IconImageSize = 34f;
+            private const float IconGap = 3f;
+            private const float Padding = 8f;
+            private const float HeaderHeight = 18f;
+            private const int Columns = 5;
+
+            private readonly Texture2D[] _icons;
+            private readonly Action<Texture2D> _onSelect;
+
+            public DefaultInventoryIconPopup(Texture2D[] icons, Action<Texture2D> onSelect)
+            {
+                _icons = icons;
+                _onSelect = onSelect;
+            }
+
+            public override Vector2 GetWindowSize()
+            {
+                var rows = Mathf.CeilToInt(_icons.Length / (float)Columns);
+                return new Vector2(Columns * IconButtonSize + (Columns - 1) * IconGap + Padding * 2f,
+                    HeaderHeight + rows * IconButtonSize + Mathf.Max(0, rows - 1) * IconGap + Padding * 2f);
+            }
+
+            public override void OnGUI(Rect rect)
+            {
+                EditorGUI.LabelField(new Rect(Padding, Padding, rect.width - Padding * 2f, HeaderHeight),
+                    InventoryEditor.Content("defaultIcons"), EditorStyles.miniBoldLabel);
+
+                var x = Padding;
+                var y = Padding + HeaderHeight;
+                for (var i = 0; i < _icons.Length; i++)
+                {
+                    var icon = _icons[i];
+                    var column = i % Columns;
+                    var row = i / Columns;
+                    var buttonRect = new Rect(x + column * (IconButtonSize + IconGap),
+                        y + row * (IconButtonSize + IconGap), IconButtonSize, IconButtonSize);
+
+                    DrawIconButton(buttonRect, icon);
+                }
+            }
+
+            private void DrawIconButton(Rect rect, Texture2D icon)
+            {
+                if (rect.Contains(Event.current.mousePosition))
+                {
+                    EditorGUI.DrawRect(rect, new Color(1f, 1f, 1f, 0.08f));
+                }
+
+                var imageRect = new Rect(
+                    rect.x + (rect.width - IconImageSize) / 2f,
+                    rect.y + (rect.height - IconImageSize) / 2f,
+                    IconImageSize,
+                    IconImageSize);
+                GUI.DrawTexture(imageRect, icon, ScaleMode.ScaleToFit, true);
+                EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+
+                if (!GUI.Button(rect, new GUIContent("", icon.name), GUIStyle.none)) return;
+
+                _onSelect(icon);
+                editorWindow.Close();
+            }
         }
 
         private void DrawAvatarSection(InventoryNode node)
