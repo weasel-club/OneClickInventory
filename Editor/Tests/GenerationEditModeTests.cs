@@ -192,7 +192,7 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
-        public void MenuGenerator_CreatesTopLevelRootMenuAndItemToggle()
+        public void MenuGenerator_CreatesGeneratedMenuRootAndItemToggle()
         {
             var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
             var itemInventory = AddInventory(CreateChild("Hat", rootInventory.transform), "Hat");
@@ -200,11 +200,19 @@ namespace Goorm.OneClickInventory.Tests
 
             MenuGenerator.Generate(Avatar, InventoryNode.ResolveRootNodes(Avatar).ToArray());
 
-            var inventoryMenuObject = Avatar.transform.Find("Root");
+            var sourceInventoryObject = Avatar.transform.Find("Root");
+            var menuRoot = Avatar.transform.Find("OneClickInventory Generated Menus");
+            Assert.That(menuRoot, Is.Not.Null);
+
+            var inventoryMenuObject = menuRoot.Find("Root");
+            Assert.That(inventoryMenuObject, Is.Not.Null);
+
             var rootMenu = inventoryMenuObject.GetComponent<ModularAvatarMenuItem>();
             var installer = inventoryMenuObject.GetComponent<ModularAvatarMenuInstaller>();
             var toggle = inventoryMenuObject.Find("Hat").GetComponent<ModularAvatarMenuItem>();
 
+            Assert.That(sourceInventoryObject.GetComponent<ModularAvatarMenuItem>(), Is.Null);
+            Assert.That(menuRoot.GetComponent<ModularAvatarMenuItem>(), Is.Null);
             Assert.That(rootMenu.Control.type, Is.EqualTo(VRCExpressionsMenu.Control.ControlType.SubMenu));
             Assert.That(rootMenu.Control.name, Is.EqualTo(rootInventory.Name));
             Assert.That(installer.menuToAppend, Is.EqualTo(Avatar.expressionsMenu));
@@ -233,6 +241,9 @@ namespace Goorm.OneClickInventory.Tests
             var generatedItemMenu = externalMenuObject.transform.parent;
 
             Assert.That(generatedItemMenu, Is.Not.Null);
+            Assert.That(generatedItemMenu.name, Is.EqualTo("Hat"));
+            Assert.That(generatedItemMenu.parent.name, Is.EqualTo("Root"));
+            Assert.That(generatedItemMenu.parent.parent.name, Is.EqualTo("OneClickInventory Generated Menus"));
             Assert.That(generatedItemMenu.GetComponent<ModularAvatarMenuItem>().Control.name, Is.EqualTo("Hat"));
             Assert.That(externalMenuObject.transform.parent, Is.EqualTo(generatedItemMenu));
         }

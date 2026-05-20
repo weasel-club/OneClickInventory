@@ -11,11 +11,26 @@ namespace Goorm.OneClickInventory
 {
     public abstract class MenuGenerator
     {
+        private const string GeneratedMenuRootName = "OneClickInventory Generated Menus";
+
+        private static Transform FindDirectChild(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name)
+                {
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
         private static ModularAvatarMenuItem AddSubmenu(string name, Texture2D icon, Transform parent)
         {
-            var existingSiblingWithName = parent.Find(name);
+            var existingSiblingWithName = FindDirectChild(parent, name);
             var menuObject = new GameObject(name);
-            menuObject.transform.SetParent(parent);
+            menuObject.transform.SetParent(parent, false);
             if (existingSiblingWithName) menuObject.transform.SetSiblingIndex(existingSiblingWithName.GetSiblingIndex());
             var menu = menuObject.AddComponent<ModularAvatarMenuItem>();
 
@@ -34,9 +49,9 @@ namespace Goorm.OneClickInventory
             string name, Texture2D icon, string parameter, int value, Transform parent
         )
         {
-            var existingSiblingWithName = parent.Find(name);
+            var existingSiblingWithName = FindDirectChild(parent, name);
             var menuObject = new GameObject(name);
-            menuObject.transform.SetParent(parent);
+            menuObject.transform.SetParent(parent, false);
             if (existingSiblingWithName) menuObject.transform.SetSiblingIndex(existingSiblingWithName.GetSiblingIndex());
             var menu = menuObject.AddComponent<ModularAvatarMenuItem>();
 
@@ -56,10 +71,7 @@ namespace Goorm.OneClickInventory
 
         private static ModularAvatarMenuItem CreateMaMenu(InventoryNode node, Transform parent)
         {
-            // If MAMenuInstaller is found, set the parent to the avatar
             var menuInstaller = node.IntegratedMenuInstaller;
-            if (menuInstaller) parent = node.Avatar.transform;
-
             ModularAvatarMenuItem menu = null;
 
             var menuItemsToInstall = node.MenuItemsToInstall.ToArray();
@@ -114,30 +126,24 @@ namespace Goorm.OneClickInventory
             // Add menus installed by InventoryMenuInstaller
             if (menu)
                 foreach (var menuItem in menuItemsToInstall)
-                    menuItem.transform.SetParent(menu.transform);
+                    menuItem.transform.SetParent(menu.transform, false);
 
             return menu;
         }
 
-        private static void Generate(
-            InventoryNode rootNode
-        )
-        {
-            if (!rootNode.IsRoot) throw new System.Exception("Invalid root node");
-
-            var menuItem = CreateMaMenu(rootNode, rootNode.Avatar.transform);
-            if (menuItem == null) return;
-
-            var installer = menuItem.gameObject.AddComponent<ModularAvatarMenuInstaller>();
-            installer.menuToAppend = rootNode.Avatar.expressionsMenu;
-        }
-
         public static void Generate(VRCAvatarDescriptor avatar, InventoryNode[] rootNodes)
         {
+            var menuRoot = new GameObject(GeneratedMenuRootName);
+            menuRoot.transform.SetParent(avatar.transform, false);
+
             foreach (var node in rootNodes)
             {
                 // Generate menu
-                Generate(node);
+                var menuItem = CreateMaMenu(node, menuRoot.transform);
+                if (menuItem == null) continue;
+
+                var installer = menuItem.gameObject.AddComponent<ModularAvatarMenuInstaller>();
+                installer.menuToAppend = avatar.expressionsMenu;
             }
         }
     }
