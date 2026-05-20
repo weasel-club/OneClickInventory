@@ -6,6 +6,7 @@ namespace Goorm.OneClickInventory
 {
     public abstract class InventoryEditorUtil
     {
+        private const string EtcFoldoutKey = "one-click-inventory.etc-foldout";
         private const string ShowLegacyOptionsKey = "one-click-inventory.show-legacy-options";
         private const string DocumentationUrl = "https://goorm.me/docs/one-click-inventory";
 
@@ -39,14 +40,36 @@ namespace Goorm.OneClickInventory
                 DrawDocumentationLink();
             }
 
+            DrawLanguageSelector();
+
             EditorGUILayout.Space(4f);
         }
 
         public static void Footer(bool showLegacyOptionsToggle = false)
         {
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField(L.Get("etc"), HeaderStyle);
+            if (!showLegacyOptionsToggle) return;
 
+            EditorGUILayout.Space();
+            var showEtc = EditorPrefs.GetBool(EtcFoldoutKey, false);
+            var nextShowEtc = EditorGUILayout.Foldout(showEtc, Content("etc"), true);
+            if (nextShowEtc != showEtc)
+            {
+                EditorPrefs.SetBool(EtcFoldoutKey, nextShowEtc);
+            }
+
+            if (!nextShowEtc) return;
+
+            var showLegacyOptions = EditorGUILayout.Toggle(Content("showLegacyOptions"), ShowLegacyOptions);
+            if (showLegacyOptions != ShowLegacyOptions)
+            {
+                EditorPrefs.SetBool(ShowLegacyOptionsKey, showLegacyOptions);
+            }
+        }
+
+        private static GUIStyle BannerTitleStyle => new(EditorStyles.boldLabel) { fontSize = 14 };
+
+        private static void DrawLanguageSelector()
+        {
             var selectedLanguage = L.Languages.FindIndex(e => e.Item1 == L.Language);
             if (selectedLanguage < 0) selectedLanguage = 0;
 
@@ -56,18 +79,7 @@ namespace Goorm.OneClickInventory
             {
                 L.Language = L.Languages[nextLanguage].Item1;
             }
-
-            if (showLegacyOptionsToggle)
-            {
-                var showLegacyOptions = EditorGUILayout.Toggle(Content("showLegacyOptions"), ShowLegacyOptions);
-                if (showLegacyOptions != ShowLegacyOptions)
-                {
-                    EditorPrefs.SetBool(ShowLegacyOptionsKey, showLegacyOptions);
-                }
-            }
         }
-
-        private static GUIStyle BannerTitleStyle => new(EditorStyles.boldLabel) { fontSize = 14 };
 
         private static void DrawDocumentationLink()
         {
