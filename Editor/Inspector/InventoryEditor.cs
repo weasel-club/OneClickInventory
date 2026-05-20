@@ -541,16 +541,49 @@ namespace Goorm.OneClickInventory
 
         private void DrawLegacyItemOptions()
         {
-            if (!InventoryEditorUtil.ShowLegacyOptions) return;
+            var showLegacyOptions = InventoryEditorUtil.ShowLegacyOptions;
+            if (!showLegacyOptions && !HasLegacyItemOptions()) return;
 
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
-            EditorGUILayout.PropertyField(ObjectsToDisable, Content("disableObject"));
-            DrawBlendShapeSection();
-            DrawMaterialSection();
-            EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
-            EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
+            DrawLegacyProperty(AdditionalObjects, Content("additionalObject"), showLegacyOptions);
+            DrawLegacyProperty(ObjectsToDisable, Content("disableObject"), showLegacyOptions);
+            DrawBlendShapeSection(showLegacyOptions);
+            DrawMaterialSection(showLegacyOptions);
+            DrawLegacyProperty(ParameterDriverBindings, Content("parameterDrivers"), showLegacyOptions);
+            DrawLegacyProperty(AdditionalAnimations, Content("additionalAnimations"), showLegacyOptions);
             EditorGUILayout.Space();
+        }
+
+        private bool HasLegacyItemOptions()
+        {
+            return HasArrayElements(AdditionalObjects)
+                   || HasArrayElements(ObjectsToDisable)
+                   || HasArrayElements(BlendShapesToChange)
+                   || HasArrayElements(MaterialsToReplace)
+                   || HasArrayElements(ParameterDriverBindings)
+                   || HasArrayElements(AdditionalAnimations);
+        }
+
+        private static void DrawLegacyProperty(SerializedProperty property, GUIContent content, bool showWhenEmpty)
+        {
+            if (!showWhenEmpty && !HasArrayElements(property)) return;
+
+            if (showWhenEmpty)
+            {
+                EditorGUILayout.PropertyField(property, content);
+                return;
+            }
+
+            property.isExpanded = true;
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.PropertyField(property, content, true);
+            }
+        }
+
+        private static bool HasArrayElements(SerializedProperty property)
+        {
+            return property.isArray && property.arraySize > 0;
         }
 
         private void DrawItemActionButtons()
@@ -658,8 +691,15 @@ namespace Goorm.OneClickInventory
             return null;
         }
 
-        private void DrawBlendShapeSection()
+        private void DrawBlendShapeSection(bool showWhenEmpty)
         {
+            if (!showWhenEmpty && !HasArrayElements(BlendShapesToChange)) return;
+
+            if (!showWhenEmpty)
+            {
+                BlendShapesToChange.isExpanded = true;
+            }
+
             BlendShapesToChange.isExpanded =
                 EditorGUILayout.Foldout(BlendShapesToChange.isExpanded, Content("setBlendShape"), true);
             if (!BlendShapesToChange.isExpanded) return;
@@ -670,11 +710,21 @@ namespace Goorm.OneClickInventory
                 EditorGUILayout.HelpBox(L.Get("emptyBlendShapeList"), MessageType.Info);
             }
 
-            _blendShapesToChangeList.DoLayoutList();
+            using (new EditorGUI.DisabledScope(!showWhenEmpty))
+            {
+                _blendShapesToChangeList.DoLayoutList();
+            }
         }
 
-        private void DrawMaterialSection()
+        private void DrawMaterialSection(bool showWhenEmpty)
         {
+            if (!showWhenEmpty && !HasArrayElements(MaterialsToReplace)) return;
+
+            if (!showWhenEmpty)
+            {
+                MaterialsToReplace.isExpanded = true;
+            }
+
             MaterialsToReplace.isExpanded =
                 EditorGUILayout.Foldout(MaterialsToReplace.isExpanded, Content("replaceMaterial"), true);
             if (!MaterialsToReplace.isExpanded) return;
@@ -685,7 +735,10 @@ namespace Goorm.OneClickInventory
                 EditorGUILayout.HelpBox(L.Get("emptyMaterialList"), MessageType.Info);
             }
 
-            _materialsToReplaceList.DoLayoutList();
+            using (new EditorGUI.DisabledScope(!showWhenEmpty))
+            {
+                _materialsToReplaceList.DoLayoutList();
+            }
         }
 
         private IEnumerable<string> GetBlendShapeWarnings()
