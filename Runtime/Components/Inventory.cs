@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
@@ -37,7 +38,11 @@ namespace Goorm.OneClickInventory.runtime
         [SerializeField]
         private string _name;
 
-        public string Name => _name;
+        [SerializeField, HideInInspector] private string _lastSyncedObjectName;
+
+        public string Name => ShouldUseObjectName(_name, _lastSyncedObjectName, gameObject ? gameObject.name : null)
+            ? gameObject.name
+            : _name;
 
         [SerializeField] private Texture2D _customIcon;
 
@@ -106,6 +111,51 @@ namespace Goorm.OneClickInventory.runtime
         private void Reset()
         {
             _name = gameObject.name;
+            _lastSyncedObjectName = gameObject.name;
+        }
+
+        private void OnValidate()
+        {
+            SyncAutoName();
+        }
+
+        private void SyncAutoName()
+        {
+            if (!gameObject) return;
+
+            if (ShouldUseObjectName(_name, _lastSyncedObjectName, gameObject.name))
+            {
+                _name = gameObject.name;
+            }
+
+            if (_name == gameObject.name)
+            {
+                _lastSyncedObjectName = gameObject.name;
+            }
+        }
+
+        private static bool ShouldUseObjectName(string inventoryName, string lastSyncedObjectName, string objectName)
+        {
+            if (string.IsNullOrWhiteSpace(objectName)) return false;
+            if (string.IsNullOrWhiteSpace(inventoryName)) return true;
+
+            if (IsUnityDefaultGameObjectName(inventoryName) && IsUnityDefaultGameObjectName(objectName))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(lastSyncedObjectName) && inventoryName == lastSyncedObjectName)
+            {
+                return objectName == lastSyncedObjectName ||
+                       objectName.StartsWith($"{lastSyncedObjectName} (", StringComparison.Ordinal);
+            }
+
+            return false;
+        }
+
+        private static bool IsUnityDefaultGameObjectName(string name)
+        {
+            return name == "GameObject" || Regex.IsMatch(name, @"^GameObject \(\d+\)$");
         }
     }
 }

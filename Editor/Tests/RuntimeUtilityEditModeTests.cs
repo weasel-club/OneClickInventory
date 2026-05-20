@@ -58,6 +58,40 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
+        public void InventoryName_FollowsDuplicatedAutoName()
+        {
+            var inventoryObject = CreateChild("Hat (1)", Avatar.transform);
+            var inventory = inventoryObject.AddComponent<Inventory>();
+            SetSerializedValue(inventory, "_name", "Hat");
+            SetSerializedValue(inventory, "_lastSyncedObjectName", "Hat");
+
+            typeof(Inventory).GetMethod("OnValidate", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(inventory, null);
+
+            Assert.That(inventory.Name, Is.EqualTo("Hat (1)"));
+        }
+
+        [Test]
+        public void InventoryName_MigratesDuplicatedUnityDefaultNames()
+        {
+            var inventoryObject = CreateChild("GameObject (4)", Avatar.transform);
+            var inventory = inventoryObject.AddComponent<Inventory>();
+            SetSerializedValue(inventory, "_name", "GameObject (1)");
+
+            Assert.That(inventory.Name, Is.EqualTo("GameObject (4)"));
+        }
+
+        [Test]
+        public void InventoryName_KeepsCustomName()
+        {
+            var inventoryObject = CreateChild("Renamed Object", Avatar.transform);
+            var inventory = inventoryObject.AddComponent<Inventory>();
+            SetSerializedValue(inventory, "_name", "Custom Label");
+
+            Assert.That(inventory.Name, Is.EqualTo("Custom Label"));
+        }
+
+        [Test]
         public void UtilMethods_FindAvatarEscapeNamesAndAddComponents()
         {
             var child = CreateChild("Child", Avatar.transform);
