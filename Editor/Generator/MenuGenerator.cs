@@ -13,8 +13,10 @@ namespace Goorm.OneClickInventory
     {
         private static ModularAvatarMenuItem AddSubmenu(string name, Texture2D icon, Transform parent)
         {
+            var existingSiblingWithName = parent.Find(name);
             var menuObject = new GameObject(name);
             menuObject.transform.SetParent(parent);
+            if (existingSiblingWithName) menuObject.transform.SetSiblingIndex(existingSiblingWithName.GetSiblingIndex());
             var menu = menuObject.AddComponent<ModularAvatarMenuItem>();
 
             menu.Control = new VRCExpressionsMenu.Control
@@ -32,8 +34,10 @@ namespace Goorm.OneClickInventory
             string name, Texture2D icon, string parameter, int value, Transform parent
         )
         {
+            var existingSiblingWithName = parent.Find(name);
             var menuObject = new GameObject(name);
             menuObject.transform.SetParent(parent);
+            if (existingSiblingWithName) menuObject.transform.SetSiblingIndex(existingSiblingWithName.GetSiblingIndex());
             var menu = menuObject.AddComponent<ModularAvatarMenuItem>();
 
             menu.Control = new VRCExpressionsMenu.Control
