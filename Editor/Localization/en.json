@@ -43,6 +43,8 @@
   "menu": "Menu",
   "advanced": "Advanced",
   "etc": "Etc",
+  "showLegacyOptions": "Show legacy options",
+  "showLegacyOptionsTooltip": "Show legacy item options in all One Click Inventory inspectors.",
   "avatar": "Avatar",
   "avatarHierarchy": "Avatar inventory hierarchy",
   "avatarHierarchyTooltip": "Preview the generated inventory menu hierarchy for this avatar.",

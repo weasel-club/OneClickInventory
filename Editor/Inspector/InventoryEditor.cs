@@ -32,7 +32,6 @@ namespace Goorm.OneClickInventory
         private ReorderableList _blendShapesToChangeList;
         private ReorderableList _materialsToReplaceList;
         private static bool _showItems;
-        private static readonly AvatarHierarchyFolding AvatarHierarchyFolding = new();
 
         static InventoryEditor()
         {
@@ -196,33 +195,14 @@ namespace Goorm.OneClickInventory
 
             serializedObject.Update();
 
-            DrawStatus(node);
             DrawWarnings(node);
             DrawMenu(node);
             DrawInventorySettings(node);
             DrawItemSettings(node);
-            InventoryEditorUtil.Footer(node.Avatar, AvatarHierarchyFolding);
+            InventoryEditorUtil.Footer(true);
 
             serializedObject.ApplyModifiedProperties();
             DisableOtherDefaults(node);
-        }
-
-        private void DrawStatus(InventoryNode node)
-        {
-            EditorGUILayout.LabelField(Content("statusSummary"), InventoryEditorUtil.HeaderStyle);
-            EditorGUILayout.HelpBox(GetStatusSummary(node), MessageType.Info);
-            EditorGUILayout.Space();
-        }
-
-        private static string GetStatusSummary(InventoryNode node)
-        {
-            var parts = new List<string>();
-            parts.Add(node.IsRoot ? L.Get("roleRoot") : node.IsItem ? L.Get("roleItem") : L.Get("roleGroup"));
-            if (node.IsInventory) parts.Add(L.Get("roleInventory"));
-            if (node.Value.Default) parts.Add(L.Get("statusDefaultItem"));
-            if (node.IntegratedMenuInstaller != null) parts.Add(L.Get("statusMenuInstallerIntegrated"));
-            parts.Add(string.Format(L.Get("statusParameterMemory"), node.UsedParameterMemory));
-            return string.Join(" / ", parts);
         }
 
         private void DrawWarnings(InventoryNode node)
@@ -314,16 +294,6 @@ namespace Goorm.OneClickInventory
             EditorGUILayout.PropertyField(Default,
                 new GUIContent(node.ParentIsUnique ? L.Get("defaultUnique") : L.Get("default"),
                     L.Get("defaultTooltip")));
-            EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
-            EditorGUILayout.PropertyField(ObjectsToDisable, Content("disableObject"));
-
-            DrawBlendShapeSection();
-            DrawMaterialSection();
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField(L.Get("advanced"), InventoryEditorUtil.HeaderStyle);
-            EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
-            EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
 
             if (!node.ParentIsUnique)
             {
@@ -335,6 +305,15 @@ namespace Goorm.OneClickInventory
             {
                 EditorGUILayout.PropertyField(IntegrateMenuInstaller, Content("integrateMenuInstaller"));
             }
+
+            if (!InventoryEditorUtil.ShowLegacyOptions) return;
+
+            EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
+            EditorGUILayout.PropertyField(ObjectsToDisable, Content("disableObject"));
+            DrawBlendShapeSection();
+            DrawMaterialSection();
+            EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
+            EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
         }
 
         private void DrawBlendShapeSection()

@@ -43,6 +43,8 @@
   "menu": "選單",
   "advanced": "進階",
   "etc": "其他",
+  "showLegacyOptions": "顯示舊版選項",
+  "showLegacyOptionsTooltip": "在所有 One Click Inventory Inspector 中顯示舊版物品選項。",
   "avatar": "角色",
   "avatarHierarchy": "角色物件庫結構",
   "avatarHierarchyTooltip": "預覽此角色將產生的物件庫選單結構。",

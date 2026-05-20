@@ -43,6 +43,8 @@
   "menu": "メニュー",
   "advanced": "詳細",
   "etc": "その他",
+  "showLegacyOptions": "レガシーオプションを表示",
+  "showLegacyOptionsTooltip": "すべての One Click Inventory インスペクターで従来のアイテムオプションを表示します。",
   "avatar": "アバター",
   "avatarHierarchy": "アバターのインベントリ構造",
   "avatarHierarchyTooltip": "このアバターに生成されるインベントリメニュー構造をプレビューします。",

@@ -43,6 +43,8 @@
   "menu": "메뉴",
   "advanced": "고급",
   "etc": "기타",
+  "showLegacyOptions": "레거시 옵션 보기",
+  "showLegacyOptionsTooltip": "기존 고급 아이템 옵션을 모든 One Click Inventory 인스펙터에서 표시합니다.",
   "avatar": "아바타",
   "avatarHierarchy": "전체 아바타 인벤토리 구조",
   "avatarHierarchyTooltip": "이 아바타에 생성될 인벤토리 메뉴 구조를 미리 확인합니다.",

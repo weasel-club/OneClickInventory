@@ -1,6 +1,5 @@
 using Goorm.OneClickInventory.runtime;
 using UnityEditor;
-using UnityEngine;
 
 namespace Goorm.OneClickInventory
 {
@@ -9,7 +8,6 @@ namespace Goorm.OneClickInventory
     public class InventoryMenuInstallerEditor : Editor
     {
         private SerializedProperty _inventory;
-        private readonly AvatarHierarchyFolding _folding = new();
 
         private void OnEnable()
         {
@@ -25,11 +23,7 @@ namespace Goorm.OneClickInventory
             EditorGUILayout.PropertyField(_inventory,
                 InventoryEditorUtil.Content("connectedInventory", "menuInstallerInventoryTooltip"));
 
-            var avatar = Util.FindAvatar(
-                (serializedObject.targetObject as InventoryMenuInstaller)?.transform
-            );
-
-            InventoryEditorUtil.Footer(avatar, _folding);
+            InventoryEditorUtil.Footer();
 
             serializedObject.ApplyModifiedProperties();
         }
