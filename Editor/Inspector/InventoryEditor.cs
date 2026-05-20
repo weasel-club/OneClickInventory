@@ -440,16 +440,22 @@ namespace Goorm.OneClickInventory
                 EditorGUILayout.PropertyField(IntegrateMenuInstaller, Content("integrateMenuInstaller"));
             }
 
+            DrawLegacyItemOptions();
             DrawItemActionButtons();
+        }
 
+        private void DrawLegacyItemOptions()
+        {
             if (!InventoryEditorUtil.ShowLegacyOptions) return;
 
+            EditorGUILayout.Space();
             EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
             EditorGUILayout.PropertyField(ObjectsToDisable, Content("disableObject"));
             DrawBlendShapeSection();
             DrawMaterialSection();
             EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
             EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
+            EditorGUILayout.Space();
         }
 
         private void DrawItemActionButtons()
