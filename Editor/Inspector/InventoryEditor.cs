@@ -1,10 +1,11 @@
 using System;
-using UnityEditor;
-using UnityEngine;
-using Goorm.OneClickInventory.runtime;
+using System.Collections.Generic;
 using System.Linq;
+using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
+using UnityEditor;
 using UnityEditorInternal;
+using UnityEngine;
 
 namespace Goorm.OneClickInventory
 {
@@ -16,7 +17,6 @@ namespace Goorm.OneClickInventory
         private SerializedProperty Name { get; set; }
 
         private SerializedProperty IsUnique { get; set; }
-
         private SerializedProperty Default { get; set; }
         private SerializedProperty AdditionalAnimations { get; set; }
         private SerializedProperty AdditionalObjects { get; set; }
@@ -43,9 +43,7 @@ namespace Goorm.OneClickInventory
         {
             Inventory = (Inventory)target;
             Name = serializedObject.FindProperty("_name");
-
             IsUnique = serializedObject.FindProperty("_isUnique");
-
             Default = serializedObject.FindProperty("_default");
             AdditionalObjects = serializedObject.FindProperty("_additionalObjects");
             AdditionalAnimations = serializedObject.FindProperty("_additionalAnimations");
@@ -63,19 +61,19 @@ namespace Goorm.OneClickInventory
                     {
                         rect.x += 15;
                         rect.width -= 15;
-                        const float gab = 10f;
-                        const float valueWidth = 50f - gab / 2;
-                        var otherWidth = (rect.width - valueWidth - gab) / 2 - gab / 2;
+                        const float gap = 10f;
+                        const float valueWidth = 50f - gap / 2;
+                        var otherWidth = (rect.width - valueWidth - gap) / 2 - gap / 2;
                         var rendererX = rect.x;
-                        var nameX = rendererX + otherWidth + gab;
-                        var valueX = nameX + otherWidth + gab;
+                        var nameX = rendererX + otherWidth + gap;
+                        var valueX = nameX + otherWidth + gap;
 
-                        EditorGUI.LabelField(new Rect(rect.x, rect.y, otherWidth, EditorGUIUtility.singleLineHeight),
-                            "Renderer");
+                        EditorGUI.LabelField(new Rect(rendererX, rect.y, otherWidth, EditorGUIUtility.singleLineHeight),
+                            L.Get("rendererColumn"));
                         EditorGUI.LabelField(new Rect(nameX, rect.y, otherWidth, EditorGUIUtility.singleLineHeight),
-                            "Name");
+                            L.Get("blendShapeNameColumn"));
                         EditorGUI.LabelField(new Rect(valueX, rect.y, valueWidth, EditorGUIUtility.singleLineHeight),
-                            "Value");
+                            L.Get("valueColumn"));
                     },
                     drawElementCallback = (rect, index, _, _) =>
                     {
@@ -86,12 +84,12 @@ namespace Goorm.OneClickInventory
                             ? Enumerable.Range(0, renderer.sharedMesh.blendShapeCount)
                                 .Select(i => renderer.sharedMesh.GetBlendShapeName(i)).ToArray()
                             : Array.Empty<string>();
-                        const float gab = 10f;
-                        const float valueWidth = 50f - gab / 2;
-                        var otherWidth = (rect.width - valueWidth - gab) / 2 - gab / 2;
+                        const float gap = 10f;
+                        const float valueWidth = 50f - gap / 2;
+                        var otherWidth = (rect.width - valueWidth - gap) / 2 - gap / 2;
                         var rendererX = rect.x;
-                        var nameX = rendererX + otherWidth + gab;
-                        var valueX = nameX + otherWidth + gab;
+                        var nameX = rendererX + otherWidth + gap;
+                        var valueX = nameX + otherWidth + gap;
 
                         EditorGUI.PropertyField(
                             new Rect(rendererX, rect.y, otherWidth, EditorGUIUtility.singleLineHeight),
@@ -113,26 +111,27 @@ namespace Goorm.OneClickInventory
                 {
                     rect.x += 15;
                     rect.width -= 15;
-                    const float gab = 10f;
-                    var width = (rect.width - gab * 2) / 3;
+                    const float gap = 10f;
+                    var width = (rect.width - gap * 2) / 3;
                     var rendererX = rect.x;
-                    var fromX = rendererX + width + gab;
-                    var toX = fromX + width + gab;
-
+                    var fromX = rendererX + width + gap;
+                    var toX = fromX + width + gap;
 
                     EditorGUI.LabelField(new Rect(rendererX, rect.y, width, EditorGUIUtility.singleLineHeight),
-                        "Renderer");
-                    EditorGUI.LabelField(new Rect(fromX, rect.y, width, EditorGUIUtility.singleLineHeight), "From");
-                    EditorGUI.LabelField(new Rect(toX, rect.y, width, EditorGUIUtility.singleLineHeight), "To");
+                        L.Get("rendererColumn"));
+                    EditorGUI.LabelField(new Rect(fromX, rect.y, width, EditorGUIUtility.singleLineHeight),
+                        L.Get("fromMaterialColumn"));
+                    EditorGUI.LabelField(new Rect(toX, rect.y, width, EditorGUIUtility.singleLineHeight),
+                        L.Get("toMaterialColumn"));
                 },
                 drawElementCallback = (rect, index, _, _) =>
                 {
                     var element = _materialsToReplaceList.serializedProperty.GetArrayElementAtIndex(index);
-                    const float gab = 10f;
-                    var width = (rect.width - gab * 2) / 3;
+                    const float gap = 10f;
+                    var width = (rect.width - gap * 2) / 3;
                     var rendererX = rect.x;
-                    var fromX = rendererX + width + gab;
-                    var toX = fromX + width + gab;
+                    var fromX = rendererX + width + gap;
+                    var toX = fromX + width + gap;
 
                     var renderer = element.FindPropertyRelative("renderer").objectReferenceValue as Renderer;
                     var materials = renderer != null ? renderer.sharedMaterials.Distinct().ToArray() : new Material[0];
@@ -152,10 +151,19 @@ namespace Goorm.OneClickInventory
             ParameterDriverBindings = serializedObject.FindProperty("_parameterDriverBindings");
         }
 
+        private static GUIContent Content(string key)
+        {
+            return InventoryEditorUtil.Content(key);
+        }
+
+        private static GUIContent Content(string key, string tooltipKey)
+        {
+            return InventoryEditorUtil.Content(key, tooltipKey);
+        }
+
         private static void DrawIconOnWindowItem(int instanceID, Rect rect)
         {
-            GameObject gameObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
-
+            var gameObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
             if (gameObject == null)
             {
                 return;
@@ -166,18 +174,14 @@ namespace Goorm.OneClickInventory
                 var size = rect.height;
                 var labelRect = new Rect(rect.xMax - size, rect.yMin, size, size);
 
-                if (inventory.Default)
-                    GUI.DrawTexture(labelRect, CachedResource.Load<Texture2D>("InventoryActive.png"));
-                else GUI.DrawTexture(labelRect, CachedResource.Load<Texture2D>("Inventory.png"));
+                GUI.DrawTexture(labelRect,
+                    CachedResource.Load<Texture2D>(inventory.Default ? "InventoryActive.png" : "Inventory.png"));
             }
         }
 
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField(
-                "이 컴포넌트가 있는 오브젝트는 인벤토리 혹은 아이템으로 설정됩니다. 속성 이름에 마우스를 대서 설명을 볼 수 있습니다.",
-                new GUIStyle(EditorStyles.label) { wordWrap = true }
-            );
+            EditorGUILayout.LabelField(L.Get("inventoryComponentDescription"), InventoryEditorUtil.DescriptionStyle);
             EditorGUILayout.Space();
 
             var avatar = Util.FindAvatar(Inventory.transform.parent);
@@ -192,143 +196,243 @@ namespace Goorm.OneClickInventory
 
             serializedObject.Update();
 
+            DrawStatus(node);
+            DrawWarnings(node);
+            DrawMenu(node);
+            DrawInventorySettings(node);
+            DrawItemSettings(node);
+            InventoryEditorUtil.Footer(node.Avatar, AvatarHierarchyFolding);
+
+            serializedObject.ApplyModifiedProperties();
+            DisableOtherDefaults(node);
+        }
+
+        private void DrawStatus(InventoryNode node)
+        {
+            EditorGUILayout.LabelField(Content("statusSummary"), InventoryEditorUtil.HeaderStyle);
+            EditorGUILayout.HelpBox(GetStatusSummary(node), MessageType.Info);
+            EditorGUILayout.Space();
+        }
+
+        private static string GetStatusSummary(InventoryNode node)
+        {
+            var parts = new List<string>();
+            parts.Add(node.IsRoot ? L.Get("roleRoot") : node.IsItem ? L.Get("roleItem") : L.Get("roleGroup"));
+            if (node.IsInventory) parts.Add(L.Get("roleInventory"));
+            if (node.Value.Default) parts.Add(L.Get("statusDefaultItem"));
+            if (node.IntegratedMenuInstaller != null) parts.Add(L.Get("statusMenuInstallerIntegrated"));
+            parts.Add(string.Format(L.Get("statusParameterMemory"), node.UsedParameterMemory));
+            return string.Join(" / ", parts);
+        }
+
+        private void DrawWarnings(InventoryNode node)
+        {
+            if (string.IsNullOrWhiteSpace(Name.stringValue))
+            {
+                EditorGUILayout.HelpBox(L.Get("emptyNameWarning"), MessageType.Warning);
+            }
+
+            if (node.IsInventory && node.Value.IsUnique && node.HasChildItems && node.DefaultChild == null)
+            {
+                EditorGUILayout.HelpBox(L.Get("uniqueNoDefaultWarning"), MessageType.Info);
+            }
+
+            foreach (var warning in GetBlendShapeWarnings())
+            {
+                EditorGUILayout.HelpBox(warning, MessageType.Warning);
+            }
+
+            foreach (var warning in GetMaterialWarnings())
+            {
+                EditorGUILayout.HelpBox(warning, MessageType.Warning);
+            }
+        }
+
+        private void DrawMenu(InventoryNode node)
+        {
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField(L.Get("menu"), InventoryEditorUtil.HeaderStyle);
-            EditorGUILayout.PropertyField(Name, new GUIContent(L.Get("name")));
+            EditorGUILayout.PropertyField(Name, Content("name"));
             AssetPreview.GetAssetPreview(Inventory.Icon);
-            EditorGUILayout.LabelField(L.Get("customIcon"));
-            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(Content("customIcon"));
+            EditorGUILayout.BeginHorizontal();
             Inventory.Icon = (Texture2D)EditorGUILayout.ObjectField(Inventory.Icon, typeof(Texture2D), false,
                 GUILayout.Width(100), GUILayout.Height(100));
-            if (GUILayout.Button(L.Get("generateIcon")))
+            if (GUILayout.Button(Content("generateIcon"), GUILayout.Height(28)))
             {
-                var icon = IconUtil.Generate(node);
-                Inventory.Icon = icon;
+                Inventory.Icon = IconUtil.Generate(node);
             }
 
-            GUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
+        }
 
+        private void DrawInventorySettings(InventoryNode node)
+        {
+            if (!node.IsInventory) return;
 
-            if (node.IsInventory)
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(L.Get("inventory"), InventoryEditorUtil.HeaderStyle);
+            EditorGUI.BeginDisabledGroup(true);
+            _showItems = EditorGUILayout.Foldout(_showItems, Content("items"), true);
+            if (_showItems)
             {
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField(L.Get("inventory"), InventoryEditorUtil.HeaderStyle);
-                EditorGUI.BeginDisabledGroup(true);
-                _showItems = EditorGUILayout.Foldout(_showItems, L.Get("items"));
-                if (_showItems)
+                foreach (var child in node.ChildItems)
                 {
-                    foreach (var child in node.ChildItems)
-                    {
-                        EditorGUILayout.ObjectField(child.Value, typeof(Inventory), false);
-                    }
-                }
-
-                if (node.DefaultChild != null)
-                {
-                    EditorGUILayout.ObjectField(L.Get("defaultItem"), node.DefaultChild.Value,
-                        typeof(Inventory), false);
-                }
-
-                EditorGUI.EndDisabledGroup();
-                EditorGUILayout.PropertyField(IsUnique,
-                    new GUIContent(L.Get("isUnique"),
-                        "체크하면 하위 아이템을 하나만 선택할 수 있게 됩니다.\n즉 옷이나 헤어와 같이 같이 하나를 입으면 다른 것은 비활성화 돼야 하는 경우에 사용합니다.\n액세서리와 같이 여러 개를 동시에 활성화 할 수 있는 경우에는 체크하지 않을 수 있습니다.\n만약 체크되어있고 기본 아이템이 설정되지 않은 경우에는 아무것도 활성화 되지 않은 상태가 기본이 됩니다."));
-
-                if (node.Value.IsUnique)
-                {
-                    EditorGUILayout.PropertyField(LayerPriority,
-                        new GUIContent(L.Get("layerPriority"),
-                            "FX 레이어 상의 레이어 우선순위를 결정합니다. Modular Avatar와 연동됩니다."));
-                    EditorGUILayout.PropertyField(Save,
-                        new GUIContent(L.Get("saved"),
-                            "체크하면 이 인벤토리의 선택된 아이템이 월드 간에 저장됩니다."));
+                    EditorGUILayout.ObjectField(child.Value, typeof(Inventory), false);
                 }
             }
 
+            if (node.DefaultChild != null)
+            {
+                EditorGUILayout.ObjectField(Content("defaultItem"), node.DefaultChild.Value, typeof(Inventory), false);
+            }
+
+            EditorGUI.EndDisabledGroup();
+            EditorGUILayout.PropertyField(IsUnique, Content("isUnique"));
+
+            if (node.Value.IsUnique)
+            {
+                EditorGUILayout.PropertyField(LayerPriority, Content("layerPriority"));
+                EditorGUILayout.PropertyField(Save, Content("saved", "savedInventoryTooltip"));
+            }
+        }
+
+        private void DrawItemSettings(InventoryNode node)
+        {
             if (node.CanBeItem)
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField(L.Get("item"), InventoryEditorUtil.HeaderStyle);
-                EditorGUILayout.PropertyField(IsNotItem,
-                    new GUIContent(L.Get("isNotItem"), "체크하면 이것은 아이템이 아니게 됩니다. 주로 카테고리를 나타내기 위해 사용합니다."));
+                EditorGUILayout.PropertyField(IsNotItem, Content("isNotItem"));
             }
 
-            if (node.IsItem)
+            if (!node.IsItem) return;
+
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.ObjectField(Content("inventory"), node.Parent.Value, typeof(Inventory), false);
+            EditorGUI.EndDisabledGroup();
+            EditorGUILayout.PropertyField(Default,
+                new GUIContent(node.ParentIsUnique ? L.Get("defaultUnique") : L.Get("default"),
+                    L.Get("defaultTooltip")));
+            EditorGUILayout.PropertyField(AdditionalObjects, Content("additionalObject"));
+            EditorGUILayout.PropertyField(ObjectsToDisable, Content("disableObject"));
+
+            DrawBlendShapeSection();
+            DrawMaterialSection();
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(L.Get("advanced"), InventoryEditorUtil.HeaderStyle);
+            EditorGUILayout.PropertyField(ParameterDriverBindings, Content("parameterDrivers"));
+            EditorGUILayout.PropertyField(AdditionalAnimations, Content("additionalAnimations"));
+
+            if (!node.ParentIsUnique)
             {
-                EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField(L.Get("inventory"), node.Parent.Value, typeof(Inventory), false);
-                EditorGUI.EndDisabledGroup();
-                EditorGUILayout.PropertyField(Default,
-                    new GUIContent(
-                        node.ParentIsUnique ? L.Get("defaultUnique") : L.Get("default"),
-                        "아바타 초기 상태일 때 (Reset Avatar 시) 기본적으로 활성화되게 됩니다. 또한 상위 인벤토리가 '하나의 아이템만 활성화' 상태인 경우, 기본 아이템으로 설정합니다."));
-                EditorGUILayout.PropertyField(AdditionalObjects,
-                    new GUIContent(L.Get("additionalObject"),
-                        "해당 아이템 활성화 시 함께 활성화 할 오브젝트를 지정합니다. 속옷 등을 옷과 같이 입는 경우에 유용합니다."));
-                EditorGUILayout.PropertyField(ObjectsToDisable,
-                    new GUIContent(L.Get("disableObject"),
-                        "해당 아이템 활성화 시 비활성화 할 오브젝트를 지정합니다. 후드 티를 뚫는 헤어 파츠를 비활성화 하는 등에 유용합니다."));
-                BlendShapesToChange.isExpanded =
-                    EditorGUILayout.Foldout(BlendShapesToChange.isExpanded, L.Get("setBlendShape"));
-                if (BlendShapesToChange.isExpanded)
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField(
-                        "Blend Shape를 변경합니다. Shrink 블렌드 셰이프나 Foot Heel(까치발) 블렌드 셰이프과 함께 사용하는 옷에 유용합니다.",
-                        new GUIStyle(EditorStyles.label) { wordWrap = true, fontSize = 11 });
-                    EditorGUILayout.Space();
-                    _blendShapesToChangeList.DoLayoutList();
-                }
-
-                MaterialsToReplace.isExpanded = EditorGUILayout.Foldout(MaterialsToReplace.isExpanded,
-                    L.Get("replaceMaterial"));
-
-                if (MaterialsToReplace.isExpanded)
-                {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("매터리얼을 변경합니다. 옷의 색상을 선택하게 하고 싶거나, 액세서리의 색상을 옷과 매칭되게 하는 등에 유용합니다.",
-                        new GUIStyle(EditorStyles.label) { wordWrap = true, fontSize = 11 });
-                    EditorGUILayout.Space();
-                    _materialsToReplaceList.DoLayoutList();
-                }
-
-                EditorGUILayout.PropertyField(ParameterDriverBindings,
-                    new GUIContent(L.Get("parameterDrivers"),
-                        "옷이 활성화 될 때 아바타의 파라미터를 변경하게 합니다. 기믹 등과 연동하기 좋습니다."));
-
-                EditorGUILayout.PropertyField(AdditionalAnimations,
-                    new GUIContent(L.Get("additionalAnimations"), "활성화 시 추가 애니메이션을 재생하도록 합니다."));
-
-                if (!node.ParentIsUnique)
-                {
-                    EditorGUILayout.PropertyField(LayerPriority,
-                        new GUIContent(L.Get("layerPriority"),
-                            "FX 레이어 상의 레이어 우선순위를 결정합니다. Modular Avatar와 연동됩니다."));
-
-                    EditorGUILayout.PropertyField(Save,
-                        new GUIContent(L.Get("saved"),
-                            "체크하면 이 아이템이 월드 간에 저장됩니다."));
-                }
-
-                if (Inventory.TryGetComponent<ModularAvatarMenuInstaller>(out _))
-                {
-                    EditorGUILayout.PropertyField(IntegrateMenuInstaller,
-                        new GUIContent(L.Get("integrateMenuInstaller"),
-                            "체크하면 MA Menu Installer로 지정한 메뉴에 아이템 메뉴가 설치됩니다."));
-                }
+                EditorGUILayout.PropertyField(LayerPriority, Content("layerPriority"));
+                EditorGUILayout.PropertyField(Save, Content("saved", "savedItemTooltip"));
             }
 
-            InventoryEditorUtil.Footer(node.Avatar, AvatarHierarchyFolding);
-            serializedObject.ApplyModifiedProperties();
-
-            // disable other default
-            if (node.ParentIsUnique && node.Value.Default)
+            if (Inventory.TryGetComponent<ModularAvatarMenuInstaller>(out _))
             {
-                foreach (var e in node.Parent.ChildItems.Where(e => e.Value != Inventory))
+                EditorGUILayout.PropertyField(IntegrateMenuInstaller, Content("integrateMenuInstaller"));
+            }
+        }
+
+        private void DrawBlendShapeSection()
+        {
+            BlendShapesToChange.isExpanded =
+                EditorGUILayout.Foldout(BlendShapesToChange.isExpanded, Content("setBlendShape"), true);
+            if (!BlendShapesToChange.isExpanded) return;
+
+            EditorGUILayout.LabelField(L.Get("blendShapeDescription"), InventoryEditorUtil.SmallDescriptionStyle);
+            if (BlendShapesToChange.arraySize == 0)
+            {
+                EditorGUILayout.HelpBox(L.Get("emptyBlendShapeList"), MessageType.Info);
+            }
+
+            _blendShapesToChangeList.DoLayoutList();
+        }
+
+        private void DrawMaterialSection()
+        {
+            MaterialsToReplace.isExpanded =
+                EditorGUILayout.Foldout(MaterialsToReplace.isExpanded, Content("replaceMaterial"), true);
+            if (!MaterialsToReplace.isExpanded) return;
+
+            EditorGUILayout.LabelField(L.Get("replaceMaterialDescription"), InventoryEditorUtil.SmallDescriptionStyle);
+            if (MaterialsToReplace.arraySize == 0)
+            {
+                EditorGUILayout.HelpBox(L.Get("emptyMaterialList"), MessageType.Info);
+            }
+
+            _materialsToReplaceList.DoLayoutList();
+        }
+
+        private IEnumerable<string> GetBlendShapeWarnings()
+        {
+            for (var i = 0; i < BlendShapesToChange.arraySize; i++)
+            {
+                var element = BlendShapesToChange.GetArrayElementAtIndex(i);
+                var renderer = element.FindPropertyRelative("renderer").objectReferenceValue as SkinnedMeshRenderer;
+                var name = element.FindPropertyRelative("name").stringValue;
+                var row = i + 1;
+
+                if (renderer == null)
                 {
-                    Undo.RecordObject(e.Value, "Unset default inventory item");
-                    e.Value.Default = false;
-                    EditorUtility.SetDirty(e.Value);
+                    yield return string.Format(L.Get("blendShapeMissingRendererWarning"), row);
+                    continue;
                 }
+
+                if (renderer.sharedMesh == null)
+                {
+                    yield return string.Format(L.Get("blendShapeMissingMeshWarning"), row);
+                    continue;
+                }
+
+                var hasBlendShape = Enumerable.Range(0, renderer.sharedMesh.blendShapeCount)
+                    .Any(index => renderer.sharedMesh.GetBlendShapeName(index) == name);
+                if (!hasBlendShape)
+                {
+                    yield return string.Format(L.Get("blendShapeMissingNameWarning"), row);
+                }
+            }
+        }
+
+        private IEnumerable<string> GetMaterialWarnings()
+        {
+            for (var i = 0; i < MaterialsToReplace.arraySize; i++)
+            {
+                var element = MaterialsToReplace.GetArrayElementAtIndex(i);
+                var renderer = element.FindPropertyRelative("renderer").objectReferenceValue as Renderer;
+                var from = element.FindPropertyRelative("from").objectReferenceValue as Material;
+                var to = element.FindPropertyRelative("to").objectReferenceValue as Material;
+                var row = i + 1;
+
+                if (renderer == null)
+                {
+                    yield return string.Format(L.Get("materialMissingRendererWarning"), row);
+                }
+
+                if (from == null)
+                {
+                    yield return string.Format(L.Get("materialMissingFromWarning"), row);
+                }
+
+                if (to == null)
+                {
+                    yield return string.Format(L.Get("materialMissingToWarning"), row);
+                }
+            }
+        }
+
+        private void DisableOtherDefaults(InventoryNode node)
+        {
+            if (!node.ParentIsUnique || !node.Value.Default) return;
+
+            foreach (var e in node.Parent.ChildItems.Where(e => e.Value != Inventory))
+            {
+                Undo.RecordObject(e.Value, "Unset default inventory item");
+                e.Value.Default = false;
+                EditorUtility.SetDirty(e.Value);
             }
         }
     }

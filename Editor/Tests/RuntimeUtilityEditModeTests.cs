@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Goorm.OneClickInventory.runtime;
 using NUnit.Framework;
 using UnityEditor;
@@ -98,11 +101,40 @@ namespace Goorm.OneClickInventory.Tests
                 Assert.That(L.Get("inventory"), Is.EqualTo("인벤토리"));
                 Assert.That(L.Get("generateIcon"), Is.EqualTo("아이콘 생성"));
                 Assert.That(L.Get("missing-localization-key"), Is.EqualTo("missing-localization-key"));
+
+                L.Language = "ja";
+
+                Assert.That(L.Get("inventory"), Is.EqualTo("インベントリ"));
+                Assert.That(L.Get("generateIcon"), Is.EqualTo("アイコンを生成"));
             }
             finally
             {
                 L.Language = originalLanguage;
             }
+        }
+
+        [Test]
+        public void Localization_FilesShareSameKeys()
+        {
+            var localizationPath = AssetDatabase.GUIDToAssetPath("d9780e86d63caeb4b9287b9a4df854d9");
+            var languages = new[] { "en", "ko", "ja", "zh-Hant" };
+            var expectedKeys = ReadLocalizationKeys(localizationPath, languages[0]);
+
+            foreach (var language in languages.Skip(1))
+            {
+                Assert.That(ReadLocalizationKeys(localizationPath, language), Is.EqualTo(expectedKeys), language);
+            }
+        }
+
+        private static IEnumerable<string> ReadLocalizationKeys(string localizationPath, string language)
+        {
+            var filename = Path.Combine(localizationPath, $"{language}.json");
+            var json = File.ReadAllText(filename);
+            return Regex.Matches(json, "^\\s*\"(?<key>[^\"]+)\"\\s*:", RegexOptions.Multiline)
+                .Cast<Match>()
+                .Select(e => e.Groups["key"].Value)
+                .OrderBy(e => e)
+                .ToArray();
         }
     }
 }

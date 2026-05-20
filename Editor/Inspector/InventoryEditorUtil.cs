@@ -15,9 +15,19 @@ namespace Goorm.OneClickInventory
 
     public abstract class InventoryEditorUtil
     {
-        private static int SelectedLanguage { get; set; }
-
         public static GUIStyle HeaderStyle => new(EditorStyles.boldLabel);
+        public static GUIStyle DescriptionStyle => new(EditorStyles.label) { wordWrap = true };
+        public static GUIStyle SmallDescriptionStyle => new(EditorStyles.label) { wordWrap = true, fontSize = 11 };
+
+        public static GUIContent Content(string key)
+        {
+            return new GUIContent(L.Get(key), L.Get($"{key}Tooltip"));
+        }
+
+        public static GUIContent Content(string key, string tooltipKey)
+        {
+            return new GUIContent(L.Get(key), L.Get(tooltipKey));
+        }
 
         private static void AvatarHierarchy(InventoryNode node, int level, AvatarHierarchyFolding folding)
         {
@@ -76,29 +86,36 @@ namespace Goorm.OneClickInventory
         public static void Footer(VRCAvatarDescriptor avatar, AvatarHierarchyFolding folding)
         {
             EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
             EditorGUILayout.LabelField(L.Get("avatar"), HeaderStyle);
 
-            folding.Show = EditorGUILayout.Foldout(folding.Show, L.Get("avatarHierarchy"));
-            if (folding.Show)
+            if (avatar == null)
             {
-                AvatarHierarchy(avatar, folding);
+                EditorGUILayout.HelpBox(L.Get("noAvatar"), MessageType.Warning);
+            }
+            else
+            {
+                folding.Show = EditorGUILayout.Foldout(folding.Show, Content("avatarHierarchy"), true);
+                if (folding.Show)
+                {
+                    AvatarHierarchy(avatar, folding);
+                }
+
+                var usedParameterMemory = InventoryNode.ResolveRootNodes(avatar).Select(e => e.UsedParameterMemory).Sum();
+                EditorGUILayout.LabelField(
+                    new GUIContent($"{L.Get("usedParameterMemory")} : {usedParameterMemory}",
+                        L.Get("usedParameterMemoryTooltip")));
             }
 
-            var usedParameterMemory = InventoryNode.ResolveRootNodes(avatar).Select(e => e.UsedParameterMemory).Sum();
-            EditorGUILayout.LabelField($"{L.Get("usedParameterMemory")} : {usedParameterMemory}");
             EditorGUILayout.Space();
             EditorGUILayout.LabelField(L.Get("etc"), HeaderStyle);
-            var selectedLanguage = EditorGUILayout.Popup(L.Get("language"), SelectedLanguage,
+            var selectedLanguage = L.Languages.FindIndex(e => e.Item1 == L.Language);
+            if (selectedLanguage < 0) selectedLanguage = 0;
+
+            var nextLanguage = EditorGUILayout.Popup(Content("language"), selectedLanguage,
                 L.Languages.Select(e => e.Item2).ToArray());
-            if (selectedLanguage != SelectedLanguage)
+            if (nextLanguage != selectedLanguage)
             {
-                SelectedLanguage = selectedLanguage;
-                L.Language = L.Languages[SelectedLanguage].Item1;
-                L.Get(L.Languages[SelectedLanguage].Item1);
+                L.Language = L.Languages[nextLanguage].Item1;
             }
         }
     }
