@@ -31,8 +31,6 @@ namespace Goorm.OneClickInventory
 
         private ReorderableList _blendShapesToChangeList;
         private ReorderableList _materialsToReplaceList;
-        private static bool _showItems;
-
         static InventoryEditor()
         {
             EditorApplication.hierarchyWindowItemOnGUI += DrawIconOnWindowItem;
@@ -252,22 +250,6 @@ namespace Goorm.OneClickInventory
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField(L.Get("inventory"), InventoryEditorUtil.HeaderStyle);
-            EditorGUI.BeginDisabledGroup(true);
-            _showItems = EditorGUILayout.Foldout(_showItems, Content("items"), true);
-            if (_showItems)
-            {
-                foreach (var child in node.ChildItems)
-                {
-                    EditorGUILayout.ObjectField(child.Value, typeof(Inventory), false);
-                }
-            }
-
-            if (node.DefaultChild != null)
-            {
-                EditorGUILayout.ObjectField(Content("defaultItem"), node.DefaultChild.Value, typeof(Inventory), false);
-            }
-
-            EditorGUI.EndDisabledGroup();
             EditorGUILayout.PropertyField(IsUnique, Content("isUnique"));
 
             if (node.Value.IsUnique)
@@ -288,9 +270,6 @@ namespace Goorm.OneClickInventory
 
             if (!node.IsItem) return;
 
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.ObjectField(Content("inventory"), node.Parent.Value, typeof(Inventory), false);
-            EditorGUI.EndDisabledGroup();
             EditorGUILayout.PropertyField(Default,
                 new GUIContent(node.ParentIsUnique ? L.Get("defaultUnique") : L.Get("default"),
                     L.Get("defaultTooltip")));
