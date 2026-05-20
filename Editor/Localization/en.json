@@ -1,6 +1,7 @@
 {
   "language": "Language",
   "languageTooltip": "Select the language used by One Click Inventory editor UI.",
+  "documentation": "See the documentation for detailed usage.",
   "inventory": "Inventory",
   "inventoryTooltip": "Parent inventory that controls this item.",
   "item": "Item",

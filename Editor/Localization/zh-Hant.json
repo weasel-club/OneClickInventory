@@ -1,6 +1,7 @@
 {
   "language": "語言",
   "languageTooltip": "選擇 One Click Inventory 編輯器 UI 使用的語言。",
+  "documentation": "詳細使用方式請參考文件。",
   "inventory": "物件庫",
   "inventoryTooltip": "控制此物品的上層物件庫。",
   "item": "物品",

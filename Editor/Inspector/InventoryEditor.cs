@@ -157,6 +157,8 @@ namespace Goorm.OneClickInventory
 
         public override void OnInspectorGUI()
         {
+            InventoryEditorUtil.Banner();
+
             var avatar = Util.FindAvatar(Inventory.transform.parent);
             if (avatar == null)
             {

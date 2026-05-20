@@ -1,6 +1,7 @@
 {
   "language": "언어",
   "languageTooltip": "One Click Inventory 에디터 UI에 사용할 언어를 선택합니다.",
+  "documentation": "자세한 사용법은 문서를 참고하세요",
   "inventory": "인벤토리",
   "inventoryTooltip": "이 아이템을 제어하는 상위 인벤토리입니다.",
   "item": "아이템",

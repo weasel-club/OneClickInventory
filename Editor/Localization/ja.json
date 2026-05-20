@@ -1,6 +1,7 @@
 {
   "language": "言語",
   "languageTooltip": "One Click Inventory エディター UI で使用する言語を選択します。",
+  "documentation": "詳しい使い方はドキュメントをご覧ください。",
   "inventory": "インベントリ",
   "inventoryTooltip": "このアイテムを制御する親インベントリです。",
   "item": "アイテム",
