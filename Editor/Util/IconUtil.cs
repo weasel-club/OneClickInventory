@@ -39,7 +39,8 @@ namespace Goorm.OneClickInventory
             cloned.transform.position = Vector3.zero;
             var cameraObject = new GameObject();
             var camera = cameraObject.AddComponent<Camera>();
-            camera.clearFlags = CameraClearFlags.Nothing;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = Color.clear;
             camera.nearClipPlane = 0.00001f;
             camera.cullingMask = 2 << (targetLayer - 1);
 
@@ -63,6 +64,13 @@ namespace Goorm.OneClickInventory
             foreach (var b in boundList.Skip(1))
             {
                 bounds.Encapsulate(b);
+            }
+
+            if (boundList.Length == 0)
+            {
+                GameObject.DestroyImmediate(camera.gameObject);
+                GameObject.DestroyImmediate(cloned.gameObject);
+                return SaveIcon(CreateTransparentTexture(256, 256));
             }
 
             // Calculate positions
@@ -109,9 +117,10 @@ namespace Goorm.OneClickInventory
             }
 
             var size = Mathf.Max(maxX - minX, maxY - minY);
-            if (size < 0)
+            if (size <= 0)
             {
-                size = 1;
+                GameObject.DestroyImmediate(image);
+                return SaveIcon(CreateTransparentTexture(256, 256));
             }
 
             int croppedSizeX = maxX - minX, croppedSizeY = maxY - minY;
@@ -123,15 +132,35 @@ namespace Goorm.OneClickInventory
 
             // Resize and save
             var resizedIcon = ResizeTexture(clippedIcon, 256, 256);
-            var bytes = resizedIcon.EncodeToPNG();
+            GameObject.DestroyImmediate(image);
+            GameObject.DestroyImmediate(clippedIcon);
+            return SaveIcon(resizedIcon);
+        }
 
+        private static Texture2D SaveIcon(Texture2D icon)
+        {
+            var bytes = icon.EncodeToPNG();
             var path = AssetUtil.GetPersistentPath("Icons/" + GUID.Generate() + ".png");
             System.IO.File.WriteAllBytes(path, bytes);
             AssetDatabase.Refresh();
             var importer = AssetImporter.GetAtPath(path) as TextureImporter;
-            importer.alphaIsTransparency = true;
-            importer.SaveAndReimport();
+            if (importer != null)
+            {
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            GameObject.DestroyImmediate(icon);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        private static Texture2D CreateTransparentTexture(int width, int height)
+        {
+            var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            MakeTexture2DClear(texture, width, height);
+            texture.alphaIsTransparency = true;
+            texture.Apply();
+            return texture;
         }
 
         private static void ChangeLayerRecursively(GameObject gameObject, int layer)
