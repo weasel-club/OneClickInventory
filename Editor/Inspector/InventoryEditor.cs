@@ -178,9 +178,6 @@ namespace Goorm.OneClickInventory
 
         public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField(L.Get("inventoryComponentDescription"), InventoryEditorUtil.DescriptionStyle);
-            EditorGUILayout.Space();
-
             var avatar = Util.FindAvatar(Inventory.transform.parent);
             if (avatar == null)
             {
@@ -208,11 +205,6 @@ namespace Goorm.OneClickInventory
             if (string.IsNullOrWhiteSpace(Name.stringValue))
             {
                 EditorGUILayout.HelpBox(L.Get("emptyNameWarning"), MessageType.Warning);
-            }
-
-            if (node.IsInventory && node.Value.IsUnique && node.HasChildItems && node.DefaultChild == null)
-            {
-                EditorGUILayout.HelpBox(L.Get("uniqueNoDefaultWarning"), MessageType.Info);
             }
 
             foreach (var warning in GetBlendShapeWarnings())
