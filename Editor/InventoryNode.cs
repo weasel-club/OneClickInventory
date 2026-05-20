@@ -2,6 +2,7 @@
 using System.Linq;
 using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
+using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 
@@ -147,7 +148,9 @@ namespace Goorm.OneClickInventory
             {
                 foreach (var child in Children.Where(e => e.Value.Default).Skip(1))
                 {
+                    Undo.RecordObject(child.Value, "Unset default inventory item");
                     child.Value.Default = false;
+                    EditorUtility.SetDirty(child.Value);
                 }
             }
 
