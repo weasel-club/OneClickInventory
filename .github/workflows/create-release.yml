@@ -23,7 +23,15 @@ jobs:
         run: |
           VERSION=$(echo "${{ github.ref_name }}")
           mkdir output
-          zip -r "output/OneClickInventory-${VERSION}.zip" . -x .git/* -x .github/* -x output/*
+          zip -r "output/OneClickInventory-${VERSION}.zip" . \
+            -x .git/* \
+            -x .github/* \
+            -x output/* \
+            -x package.json.tmp \
+            -x Editor/Tests.meta \
+            -x Editor/Tests/* \
+            -x scripts.meta \
+            -x scripts/*
 
       - name: Make unitypackage
         uses: weasel-club/unitypackage-release-action@v1
@@ -34,7 +42,7 @@ jobs:
               {
                 "package_name": "OneClickInventory",
                 "output_file_name": "OneClickInventory-${{ github.ref_name }}.unitypackage",
-                "include_roots": ["Editor", "Runtime", "package.json", "README.md", "LICENSE"],
+                "include_roots": ["Editor", "Runtime", "Icons", "package.json", "README.md", "LICENSE"],
                 "exclude_paths": ["Editor/Tests"],
                 "target_root": "Assets/OneClickInventory"
               }
