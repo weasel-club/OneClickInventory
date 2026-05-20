@@ -350,15 +350,20 @@ namespace Goorm.OneClickInventory
 
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                DrawInventoryTreeNode(selectedNode.Root, selectedNode, new List<bool>());
+                var roots = InventoryNode.ResolveRootNodes(selectedNode.Avatar);
+                foreach (var root in roots)
+                {
+                    DrawInventoryTreeNode(root, selectedNode, new List<bool>());
+                }
             }
         }
 
         private static void DrawParameterMemorySummary(InventoryNode node)
         {
+            var usedParameterMemory = InventoryNode.ResolveRootNodes(node.Avatar).Sum(e => e.UsedParameterMemory);
             EditorGUILayout.LabelField(
                 Content("usedParameterMemory"),
-                new GUIContent(node.Root.UsedParameterMemory.ToString()));
+                new GUIContent(usedParameterMemory.ToString()));
         }
 
         private static void DrawInventoryTreeNode(InventoryNode node, InventoryNode selectedNode,
