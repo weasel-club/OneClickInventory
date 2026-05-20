@@ -52,11 +52,11 @@ namespace Goorm.OneClickInventory
 
             var boundList = cloned.GetComponentsInChildren<Renderer>().Select<Renderer, Bounds?>(e =>
             {
-                if (e.TryGetComponent(out SkinnedMeshRenderer renderer))
+                if (e.TryGetComponent(out SkinnedMeshRenderer renderer) && renderer.sharedMesh == null)
                 {
-                    if (renderer.sharedMesh == null) return null;
-                    return new Bounds(renderer.bounds.center, renderer.sharedMesh.bounds.size);
+                    return null;
                 }
+
                 return e.bounds;
             }).OfType<Bounds>().ToArray();
 
