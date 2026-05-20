@@ -218,13 +218,39 @@ namespace Goorm.OneClickInventory
             transition.canTransitionToSelf = false;
         }
 
-        private static void SetupParameterDrivers(AnimatorState state, InventoryNode node)
+        private static void SetupParameterDrivers(AnimatorState state, IEnumerable<InventoryNode> enabledNodes,
+            IEnumerable<InventoryNode> disabledNodes = null, bool includeLegacy = true)
         {
-            if (node.Value.ParameterDriverBindings.Count() == 0) return;
+            var parameters = new List<VRC_AvatarParameterDriver.Parameter>();
+            var enabledNodeList = enabledNodes.ToList();
+            if (includeLegacy)
+            {
+                parameters.AddRange(enabledNodeList.SelectMany(node => node.Value.ParameterDriverBindings)
+                    .Select(e => e.parameter));
+            }
+
+            parameters.AddRange(enabledNodeList.SelectMany(GetActiveParameterNames)
+                .Select(name => new VRC_AvatarParameterDriver.Parameter { name = name, value = 1 }));
+            if (disabledNodes != null)
+            {
+                parameters.AddRange(disabledNodes.SelectMany(GetActiveParameterNames)
+                    .Where(name => enabledNodeList.All(node => !GetActiveParameterNames(node).Contains(name)))
+                    .Distinct()
+                    .Select(name => new VRC_AvatarParameterDriver.Parameter { name = name, value = 0 }));
+            }
+
+            if (parameters.Count == 0) return;
             var driver = state.AddStateMachineBehaviour<VRCAvatarParameterDriver>();
             if (!driver) return;
-            driver.parameters = new List<VRC_AvatarParameterDriver.Parameter>();
-            driver.parameters.AddRange(node.Value.ParameterDriverBindings.Select(e => e.parameter));
+            driver.parameters = parameters;
+        }
+
+        private static IEnumerable<string> GetActiveParameterNames(InventoryNode node)
+        {
+            return node.Value.GetComponents<InventoryActiveParameter>()
+                .Select(e => e.ParameterName)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Distinct();
         }
 
         private static void AddEncodedEqualsConditions(AnimatorStateTransition transition, string parameterName,
@@ -307,6 +333,8 @@ namespace Goorm.OneClickInventory
                 // setup idle
                 var idleState = layer.stateMachine.AddState("Idle", new Vector3(0, 0));
                 layer.stateMachine.defaultState = idleState;
+                SetupParameterDrivers(idleState, Enumerable.Empty<InventoryNode>(), new[] { node },
+                    includeLegacy: false);
 
                 // transition to idle when parent is disabled
                 AddTransitionsToDisable(node.Parent,
@@ -322,11 +350,13 @@ namespace Goorm.OneClickInventory
                 AddTransitionToEnable(node,
                     () => layer.stateMachine.AddAnyStateTransition(enabledState),
                     (name, type) => parameters[name] = type);
-                SetupParameterDrivers(enabledState, node);
+                SetupParameterDrivers(enabledState, new[] { node });
             }
 
             {
                 disabledState.motion = disabledClip;
+                SetupParameterDrivers(disabledState, Enumerable.Empty<InventoryNode>(), new[] { node },
+                    includeLegacy: false);
                 var transitions = AddTransitionsToDisable(node,
                     () => layer.stateMachine.AddAnyStateTransition(disabledState),
                     (name, type) => parameters[name] = type,
@@ -372,6 +402,8 @@ namespace Goorm.OneClickInventory
                 // setup idle
                 var idleState = layer.stateMachine.AddState("Idle", new Vector3(0, 0));
                 layer.stateMachine.defaultState = idleState;
+                SetupParameterDrivers(idleState, Enumerable.Empty<InventoryNode>(), node.ChildItems,
+                    includeLegacy: false);
 
                 // transition to idle when parent is disabled
                 AddTransitionsToDisable(node,
@@ -387,12 +419,15 @@ namespace Goorm.OneClickInventory
                 {
                     defaultState.name = defaultNode.EscapedName;
                     defaultState.motion = clips[defaultNode];
-                    SetupParameterDrivers(defaultState, defaultNode);
+                    SetupParameterDrivers(defaultState, new[] { defaultNode },
+                        node.ChildItems.Where(child => child != defaultNode));
                 }
                 else
                 {
                     defaultState.name = "Disabled";
                     defaultState.motion = disableAllClip;
+                    SetupParameterDrivers(defaultState, Enumerable.Empty<InventoryNode>(), node.ChildItems,
+                        includeLegacy: false);
                 }
 
                 var transition = layer.stateMachine.AddAnyStateTransition(defaultState);
@@ -417,7 +452,7 @@ namespace Goorm.OneClickInventory
                 AddTransitionToEnable(child,
                     () => layer.stateMachine.AddAnyStateTransition(state),
                     (name, type) => parameters[name] = type);
-                SetupParameterDrivers(state, child);
+                SetupParameterDrivers(state, new[] { child }, node.ChildItems.Where(sibling => sibling != child));
                 position += gab;
             }
 

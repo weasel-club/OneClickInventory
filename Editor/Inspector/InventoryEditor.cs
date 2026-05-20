@@ -442,9 +442,10 @@ namespace Goorm.OneClickInventory
 
             const float gap = 2f;
             var rect = EditorGUILayout.GetControlRect(false, 28f);
-            var buttonWidth = (rect.width - gap) / 2f;
+            var buttonWidth = (rect.width - gap * 2f) / 3f;
             var shapeChangerRect = new Rect(rect.x, rect.y, buttonWidth, rect.height);
             var objectToggleRect = new Rect(shapeChangerRect.xMax + gap, rect.y, buttonWidth, rect.height);
+            var activeParameterRect = new Rect(objectToggleRect.xMax + gap, rect.y, buttonWidth, rect.height);
             var iconSize = EditorGUIUtility.GetIconSize();
             EditorGUIUtility.SetIconSize(new Vector2(16f, 16f));
 
@@ -452,17 +453,26 @@ namespace Goorm.OneClickInventory
                 "SkinnedMeshRenderer Icon", "MeshRenderer Icon");
             DrawAddComponentButton<ModularAvatarObjectToggle>(objectToggleRect, "addObjectToggleButton",
                 "GameObject Icon", "Prefab Icon");
+            DrawAddComponentButton<InventoryActiveParameter>(activeParameterRect, "addActiveParameterButton", true,
+                "AnimatorController Icon", "d_AnimatorController Icon");
 
             EditorGUIUtility.SetIconSize(iconSize);
         }
 
-        private void DrawAddComponentButton<T>(Rect rect, string contentKey, params string[] iconNames) where T : Component
+        private void DrawAddComponentButton<T>(Rect rect, string contentKey, params string[] iconNames)
+            where T : Component
+        {
+            DrawAddComponentButton<T>(rect, contentKey, false, iconNames);
+        }
+
+        private void DrawAddComponentButton<T>(Rect rect, string contentKey, bool allowMultiple,
+            params string[] iconNames) where T : Component
         {
             var content = Content(contentKey);
             content.image = LoadEditorIcon(iconNames);
             var hasComponent = Inventory.TryGetComponent<T>(out _);
 
-            using (new EditorGUI.DisabledScope(hasComponent))
+            using (new EditorGUI.DisabledScope(!allowMultiple && hasComponent))
             {
                 if (!GUI.Button(rect, content))
                 {

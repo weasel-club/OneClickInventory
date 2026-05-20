@@ -35,6 +35,21 @@ namespace Goorm.OneClickInventory
 
             if (node.IsItem)
             {
+                foreach (var parameterName in node.Value.GetComponents<InventoryActiveParameter>()
+                             .Select(e => e.ParameterName)
+                             .Where(e => !string.IsNullOrWhiteSpace(e))
+                             .Distinct())
+                {
+                    configs[parameterName] = new ParameterConfig
+                    {
+                        nameOrPrefix = parameterName,
+                        syncType = ParameterSyncType.Bool,
+                        defaultValue = 0,
+                        saved = false,
+                        localOnly = true
+                    };
+                }
+
                 configs[node.ParameterName] = new ParameterConfig
                 {
                     nameOrPrefix = node.ParameterName,
@@ -99,7 +114,7 @@ namespace Goorm.OneClickInventory
             }
 
             // Remove Inventory components
-            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller) };
+            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryActiveParameter) };
             foreach (var type in types)
             {
                 foreach (var component in avatar.GetComponentsInChildren(type, true))

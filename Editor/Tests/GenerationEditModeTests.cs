@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Avatars.ScriptableObjects;
+using VRC.SDKBase;
 
 namespace Goorm.OneClickInventory.Tests
 {
@@ -52,6 +53,28 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
+        public void GenerateControllers_NonUniqueActiveParameterFollowsItemState()
+        {
+            var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
+            var itemObject = CreateChild("Hat", rootInventory.transform);
+            AddInventory(itemObject, "Hat");
+            AddActiveParameter(itemObject, "HatActive");
+            var itemNode = InventoryNode.ResolveRootNodes(Avatar).Single().ChildItems.Single();
+
+            var controller = AnimationGenerator.GenerateControllers(itemNode.Root).Keys.Single();
+            var states = controller.layers[0].stateMachine.states;
+            var enabledState = states.Single(e => e.state.name.StartsWith("Enabled", System.StringComparison.Ordinal))
+                .state;
+            var disabledState = states.Single(e => e.state.name.StartsWith("Disabled", System.StringComparison.Ordinal))
+                .state;
+            var idleState = states.Single(e => e.state.name == "Idle").state;
+
+            Assert.That(GetParameterDriverValue(enabledState, "HatActive"), Is.EqualTo(1f));
+            Assert.That(GetParameterDriverValue(disabledState, "HatActive"), Is.EqualTo(0f));
+            Assert.That(GetParameterDriverValue(idleState, "HatActive"), Is.EqualTo(0f));
+        }
+
+        [Test]
         public void GenerateControllers_UniqueInventoryCreatesDefaultAndChildStates()
         {
             var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
@@ -72,6 +95,34 @@ namespace Goorm.OneClickInventory.Tests
                 Has.Member(rootNode.Key).And.Member(AnimationGenerator.GetSyncedParameterName(rootNode.Key)));
             Assert.That(controller.layers[0].stateMachine.states.Select(e => e.state.name),
                 Has.Member("Default").And.Member("Second"));
+        }
+
+        [Test]
+        public void GenerateControllers_UniqueActiveParametersResetSiblingItems()
+        {
+            var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
+            SetSerializedValue(rootInventory, "_isUnique", true);
+            var firstObject = CreateChild("First", rootInventory.transform);
+            var firstInventory = AddInventory(firstObject, "First");
+            SetSerializedValue(firstInventory, "_default", true);
+            AddActiveParameter(firstObject, "FirstActive");
+            var secondObject = CreateChild("Second", rootInventory.transform);
+            AddInventory(secondObject, "Second");
+            AddActiveParameter(secondObject, "SecondActive");
+            var rootNode = InventoryNode.ResolveRootNodes(Avatar).Single();
+
+            var controller = AnimationGenerator.GenerateControllers(rootNode).Keys.Single();
+            var states = controller.layers[0].stateMachine.states;
+            var firstState = states.Single(e => e.state.name == "First").state;
+            var secondState = states.Single(e => e.state.name == "Second").state;
+            var idleState = states.Single(e => e.state.name == "Idle").state;
+
+            Assert.That(GetParameterDriverValue(firstState, "FirstActive"), Is.EqualTo(1f));
+            Assert.That(GetParameterDriverValue(firstState, "SecondActive"), Is.EqualTo(0f));
+            Assert.That(GetParameterDriverValue(secondState, "FirstActive"), Is.EqualTo(0f));
+            Assert.That(GetParameterDriverValue(secondState, "SecondActive"), Is.EqualTo(1f));
+            Assert.That(GetParameterDriverValue(idleState, "FirstActive"), Is.EqualTo(0f));
+            Assert.That(GetParameterDriverValue(idleState, "SecondActive"), Is.EqualTo(0f));
         }
 
         [Test]
@@ -214,6 +265,27 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
+        public void Generator_CreatesLocalBoolParametersForActiveParameters()
+        {
+            var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
+            var itemObject = CreateChild("Hat", rootInventory.transform);
+            AddInventory(itemObject, "Hat");
+            AddActiveParameter(itemObject, "HatActive");
+
+            Generator.Generate(Avatar);
+
+            var parameter = Avatar.GetComponentsInChildren<ModularAvatarParameters>(true)
+                .SelectMany(e => e.parameters)
+                .Single(e => e.nameOrPrefix == "HatActive");
+
+            Assert.That(parameter.syncType, Is.EqualTo(ParameterSyncType.Bool));
+            Assert.That(parameter.defaultValue, Is.EqualTo(0));
+            Assert.That(parameter.saved, Is.False);
+            Assert.That(parameter.localOnly, Is.True);
+            Assert.That(Avatar.GetComponentInChildren<InventoryActiveParameter>(true), Is.Null);
+        }
+
+        [Test]
         public void Generator_ParameterDefaultsFollowUniqueAndNonUniqueItems()
         {
             var uniqueInventory = AddInventory(CreateChild("Unique", Avatar.transform), "Unique");
@@ -240,6 +312,23 @@ namespace Goorm.OneClickInventory.Tests
                 Is.EqualTo(1));
             Assert.That(parameters.Single(e => e.nameOrPrefix == "OCInv/ToggleRoot/ToggleItem/Toggle/Bits/0").saved,
                 Is.False);
+        }
+
+        private static float? GetParameterDriverValue(AnimatorState state, string parameterName)
+        {
+            return state.behaviours
+                .OfType<VRCAvatarParameterDriver>()
+                .SelectMany(e => e.parameters)
+                .Where(e => e.name == parameterName)
+                .Select(e => (float?)e.value)
+                .FirstOrDefault();
+        }
+
+        private static InventoryActiveParameter AddActiveParameter(GameObject gameObject, string parameterName)
+        {
+            var activeParameter = gameObject.AddComponent<InventoryActiveParameter>();
+            SetSerializedValue(activeParameter, "_parameterName", parameterName);
+            return activeParameter;
         }
     }
 }
