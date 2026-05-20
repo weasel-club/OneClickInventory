@@ -43,19 +43,15 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
-        public void ResetInitializesInventoryAndConfigNames()
+        public void ResetInitializesInventoryName()
         {
             var inventoryObject = CreateChild("Named Object", Avatar.transform);
             var inventory = inventoryObject.AddComponent<Inventory>();
-            var config = AvatarObject.AddComponent<InventoryConfig>();
 
             typeof(Inventory).GetMethod("Reset", BindingFlags.Instance | BindingFlags.NonPublic)
                 .Invoke(inventory, null);
-            typeof(InventoryConfig).GetMethod("Reset", BindingFlags.Instance | BindingFlags.NonPublic)
-                .Invoke(config, null);
 
             Assert.That(inventory.Name, Is.EqualTo("Named Object"));
-            Assert.That(config.CustomMenuName, Is.EqualTo("Inventory"));
         }
 
         [Test]
@@ -69,8 +65,8 @@ namespace Goorm.OneClickInventory.Tests
             Assert.That(Util.IsInAvatar(Avatar, outside.transform), Is.False);
             Assert.That(Util.EscapeStateMachineName("A.B C/D(E)"), Is.EqualTo("A_B_C_D_E_"));
 
-            var created = Util.GetOrAddComponent<InventoryConfig>(AvatarObject);
-            var existing = Util.GetOrAddComponent<InventoryConfig>(AvatarObject);
+            var created = Util.GetOrAddComponent<Inventory>(AvatarObject);
+            var existing = Util.GetOrAddComponent<Inventory>(AvatarObject);
 
             Assert.That(existing, Is.EqualTo(created));
             Object.DestroyImmediate(outside);

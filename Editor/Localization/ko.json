@@ -2,8 +2,6 @@
   "language": "언어",
   "inventory": "인벤토리",
   "item": "아이템",
-  "customMenuName": "메뉴 이름",
-  "customMenuIcon": "메뉴 아이콘",
   "isUnique": "하나의 아이템만 활성화",
   "name": "이름",
   "defaultUnique": "인벤토리의 기본 아이템으로 설정",
@@ -28,6 +26,5 @@
   "avatarHierarchy": "전체 아바타 인벤토리 구조",
   "usedParameterMemory": "사용하는 파라미터 메모리",
   "isNotItem": "아이템으로 설정하지 않음",
-  "installMenuInRoot": "메뉴를 최상위에 설치",
   "integrateMenuInstaller": "MA Menu Installer 통합"
 }

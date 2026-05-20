@@ -116,19 +116,11 @@ namespace Goorm.OneClickInventory
         }
 
         private static void Generate(
-            InventoryNode rootNode,
-            Transform menuParent
+            InventoryNode rootNode
         )
         {
             if (!rootNode.IsRoot) throw new System.Exception("Invalid root node");
 
-            if (!rootNode.Value.InstallMenuInRoot)
-            {
-                CreateMaMenu(rootNode, menuParent);
-                return;
-            }
-
-            // If node is set to be installed in the root menu
             var menuItem = CreateMaMenu(rootNode, rootNode.Avatar.transform);
             if (menuItem == null) return;
 
@@ -138,41 +130,10 @@ namespace Goorm.OneClickInventory
 
         public static void Generate(VRCAvatarDescriptor avatar, InventoryNode[] rootNodes)
         {
-            // Get avatar inventory config
-            var menuName = L.Get("inventory");
-            Texture2D menuIcon = null;
-            if (avatar.TryGetComponent<InventoryConfig>(out var config))
-            {
-                menuName = config.CustomMenuName;
-                menuIcon = config.CustomIcon;
-            }
-
-            // Create inventory object
-            var inventoryObject = new GameObject(menuName);
-            inventoryObject.transform.SetParent(avatar.transform);
-
-            // Create root inventory menu when there are any non-root menu items
-            if (rootNodes.Any(e => !e.Value.InstallMenuInRoot && e.ShouldBeSubmenu))
-            {
-                // Create menu installer
-                var menuInstaller = inventoryObject.AddComponent<ModularAvatarMenuInstaller>();
-                menuInstaller.menuToAppend = avatar.expressionsMenu;
-
-                // Create root menu
-                var menuItem = inventoryObject.AddComponent<ModularAvatarMenuItem>();
-                menuItem.Control = new VRCExpressionsMenu.Control
-                {
-                    type = VRCExpressionsMenu.Control.ControlType.SubMenu,
-                    name = menuName,
-                    icon = menuIcon
-                };
-                menuItem.MenuSource = SubmenuSource.Children;
-            }
-
             foreach (var node in rootNodes)
             {
                 // Generate menu
-                Generate(node, inventoryObject.transform);
+                Generate(node);
             }
         }
     }

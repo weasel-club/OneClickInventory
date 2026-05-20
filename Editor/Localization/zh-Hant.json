@@ -2,8 +2,6 @@
   "language": "語言",
   "inventory": "物件庫",
   "item": "物品",
-  "customMenuName": "自訂選單名稱",
-  "customMenuIcon": "自訂選單圖示",
   "isUnique": "啟用僅一件物品",
   "name": "名稱",
   "defaultUnique": "設為預設物品",
@@ -28,6 +26,5 @@
   "avatarHierarchy": "角色物件庫結構",
   "usedParameterMemory": "已使用 Parameter",
   "isNotItem": "設此物件非物品",
-  "installMenuInRoot": "安裝選單到主選單下",
   "integrateMenuInstaller": "與 MA Menu Installer 整合"
 }

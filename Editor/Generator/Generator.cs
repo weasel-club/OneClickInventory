@@ -99,7 +99,7 @@ namespace Goorm.OneClickInventory
             }
 
             // Remove Inventory components
-            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryConfig) };
+            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller) };
             foreach (var type in types)
             {
                 foreach (var component in avatar.GetComponentsInChildren(type, true))

@@ -2,8 +2,6 @@
   "language": "Language",
   "inventory": "Inventory",
   "item": "Item",
-  "customMenuName": "Custom menu name",
-  "customMenuIcon": "Custom menu icon",
   "isUnique": "Enable only one item",
   "name": "Name",
   "defaultUnique": "Set as default item of inventory",
@@ -28,6 +26,5 @@
   "avatarHierarchy": "Avatar inventory hierarchy",
   "usedParameterMemory": "Used parameter memory",
   "isNotItem": "Set this object as not item",
-  "installMenuInRoot": "Install menu in root",
   "integrateMenuInstaller": "Integrate with MA Menu Installer"
 }

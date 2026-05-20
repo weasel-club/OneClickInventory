@@ -13,7 +13,6 @@ namespace Goorm.OneClickInventory
     public class InventoryEditor : Editor
     {
         private Inventory Inventory { get; set; }
-        private SerializedProperty InstallMenuInRoot { get; set; }
         private SerializedProperty Name { get; set; }
 
         private SerializedProperty IsUnique { get; set; }
@@ -46,7 +45,6 @@ namespace Goorm.OneClickInventory
             Name = serializedObject.FindProperty("_name");
 
             IsUnique = serializedObject.FindProperty("_isUnique");
-            InstallMenuInRoot = serializedObject.FindProperty("_installMenuInRoot");
 
             Default = serializedObject.FindProperty("_default");
             AdditionalObjects = serializedObject.FindProperty("_additionalObjects");
@@ -195,12 +193,6 @@ namespace Goorm.OneClickInventory
             serializedObject.Update();
 
             EditorGUILayout.LabelField(L.Get("menu"), InventoryEditorUtil.HeaderStyle);
-            if (node.IsRoot)
-            {
-                EditorGUILayout.PropertyField(InstallMenuInRoot,
-                    new GUIContent(L.Get("installMenuInRoot"), "체크하면 메뉴가 서브 메뉴가 아닌 최상위에 설치됩니다."));
-            }
-
             EditorGUILayout.PropertyField(Name, new GUIContent(L.Get("name")));
             AssetPreview.GetAssetPreview(Inventory.Icon);
             EditorGUILayout.LabelField(L.Get("customIcon"));

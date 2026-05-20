@@ -33,10 +33,6 @@ namespace Goorm.OneClickInventory.runtime
     [AddComponentMenu("One-Click Inventory/Inventory")]
     public class Inventory : MonoBehaviour, IEditorOnly
     {
-        [SerializeField] private bool _installMenuInRoot;
-
-        public bool InstallMenuInRoot => _installMenuInRoot;
-
         [FormerlySerializedAs("_closetName")]
         [SerializeField]
         private string _name;

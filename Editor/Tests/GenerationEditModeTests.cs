@@ -141,25 +141,22 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
-        public void MenuGenerator_CreatesCustomRootMenuAndItemToggle()
+        public void MenuGenerator_CreatesTopLevelRootMenuAndItemToggle()
         {
-            var icon = CreateTextureAsset("Icon.asset", Color.green);
-            var config = AvatarObject.AddComponent<InventoryConfig>();
-            SetSerializedValue(config, "_customMenuName", "Custom Inventory");
-            SetSerializedObjectReference(config, "_customIcon", icon);
             var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
             var itemInventory = AddInventory(CreateChild("Hat", rootInventory.transform), "Hat");
             var itemNode = InventoryNode.ResolveRootNodes(Avatar).Single().ChildItems.Single();
 
             MenuGenerator.Generate(Avatar, InventoryNode.ResolveRootNodes(Avatar).ToArray());
 
-            var inventoryMenuObject = Avatar.transform.Find("Custom Inventory");
+            var inventoryMenuObject = Avatar.transform.Find("Root");
             var rootMenu = inventoryMenuObject.GetComponent<ModularAvatarMenuItem>();
-            var toggle = inventoryMenuObject.Find("Root/Hat").GetComponent<ModularAvatarMenuItem>();
+            var installer = inventoryMenuObject.GetComponent<ModularAvatarMenuInstaller>();
+            var toggle = inventoryMenuObject.Find("Hat").GetComponent<ModularAvatarMenuItem>();
 
             Assert.That(rootMenu.Control.type, Is.EqualTo(VRCExpressionsMenu.Control.ControlType.SubMenu));
-            Assert.That(rootMenu.Control.name, Is.EqualTo("Custom Inventory"));
-            Assert.That(rootMenu.Control.icon, Is.EqualTo(icon));
+            Assert.That(rootMenu.Control.name, Is.EqualTo(rootInventory.Name));
+            Assert.That(installer.menuToAppend, Is.EqualTo(Avatar.expressionsMenu));
             Assert.That(toggle.Control.type, Is.EqualTo(VRCExpressionsMenu.Control.ControlType.Toggle));
             Assert.That(toggle.Control.name, Is.EqualTo(itemInventory.Name));
             Assert.That(toggle.Control.parameter.name, Is.EqualTo(itemNode.ParameterName));
@@ -192,8 +189,6 @@ namespace Goorm.OneClickInventory.Tests
         [Test]
         public void Generator_CreatesMergeAnimatorAndParametersThenRemovesInventoryComponents()
         {
-            var config = AvatarObject.AddComponent<InventoryConfig>();
-            SetSerializedValue(config, "_customMenuName", "Inventory");
             var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
             SetSerializedValue(rootInventory, "_isUnique", true);
             SetSerializedValue(rootInventory, "_saved", true);
@@ -216,7 +211,6 @@ namespace Goorm.OneClickInventory.Tests
             Assert.That(parameters.Single(e => e.nameOrPrefix == "OCInv/Root").localOnly, Is.True);
             Assert.That(parameters.Single(e => e.nameOrPrefix == "OCInv/Root/Bits/0").saved, Is.True);
             Assert.That(Avatar.GetComponentInChildren<Inventory>(true), Is.Null);
-            Assert.That(Avatar.GetComponentInChildren<InventoryConfig>(true), Is.Null);
         }
 
         [Test]

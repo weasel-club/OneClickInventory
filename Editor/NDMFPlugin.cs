@@ -20,7 +20,6 @@ namespace Goorm.OneClickInventory
         {
             InPhase(BuildPhase.Optimizing).Run("Clear inventory components", ctx =>
             {
-                ClearComponents<InventoryConfig>(ctx.AvatarRootTransform);
                 ClearComponents<Inventory>(ctx.AvatarRootTransform);
             });
 
