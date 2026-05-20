@@ -13,6 +13,8 @@ namespace Goorm.OneClickInventory
     [CanEditMultipleObjects]
     public class InventoryEditor : Editor
     {
+        private static bool _showStructurePreview = true;
+
         private Inventory Inventory { get; set; }
         private SerializedProperty Name { get; set; }
 
@@ -194,6 +196,8 @@ namespace Goorm.OneClickInventory
             DrawMenu(node);
             DrawInventorySettings(node);
             DrawItemSettings(node);
+            DrawAvatarSection(node);
+            EditorGUILayout.Space(12f);
             InventoryEditorUtil.Footer(true);
 
             serializedObject.ApplyModifiedProperties();
@@ -234,6 +238,165 @@ namespace Goorm.OneClickInventory
             }
 
             EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawAvatarSection(InventoryNode node)
+        {
+            EditorGUILayout.Space(12f);
+            EditorGUILayout.LabelField(L.Get("avatar"), InventoryEditorUtil.HeaderStyle);
+            DrawParameterMemorySummary(node);
+            DrawStructurePreview(node);
+        }
+
+        private void DrawStructurePreview(InventoryNode selectedNode)
+        {
+            _showStructurePreview = EditorGUILayout.Foldout(_showStructurePreview, Content("avatarHierarchy"), true);
+            if (!_showStructurePreview) return;
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                DrawInventoryTreeNode(selectedNode.Root, selectedNode, new List<bool>());
+            }
+        }
+
+        private static void DrawParameterMemorySummary(InventoryNode node)
+        {
+            EditorGUILayout.LabelField(
+                Content("usedParameterMemory"),
+                new GUIContent(node.Root.UsedParameterMemory.ToString()));
+        }
+
+        private static void DrawInventoryTreeNode(InventoryNode node, InventoryNode selectedNode,
+            IReadOnlyList<bool> parentHasNextSiblings)
+        {
+            const float indentWidth = 14f;
+            const float lineCenterOffset = 7f;
+            const float iconOffset = 4f;
+            var rowHeight = EditorGUIUtility.singleLineHeight + 4f;
+            var rect = EditorGUILayout.GetControlRect(false, rowHeight);
+            var depth = parentHasNextSiblings.Count;
+            var rowRect = new Rect(
+                rect.x,
+                rect.y + 1f,
+                rect.width,
+                EditorGUIUtility.singleLineHeight + 2f);
+
+            if (node.Value == selectedNode.Value)
+            {
+                EditorGUI.DrawRect(rowRect, new Color(0.24f, 0.48f, 0.90f, 0.18f));
+            }
+            else if (rowRect.Contains(Event.current.mousePosition))
+            {
+                EditorGUI.DrawRect(rowRect, EditorGUIUtility.isProSkin
+                    ? new Color(1f, 1f, 1f, 0.08f)
+                    : new Color(0f, 0f, 0f, 0.06f));
+            }
+
+            DrawTreeLines(rowRect, parentHasNextSiblings, indentWidth, lineCenterOffset);
+
+            var iconX = rowRect.x + depth * indentWidth + iconOffset;
+            var iconRect = new Rect(iconX, rowRect.y + 1f, 16f, 16f);
+            var nameRect = new Rect(iconRect.xMax + 2f, rowRect.y, rowRect.xMax - iconRect.xMax - 2f,
+                rowRect.height);
+            var statusContent = BuildTreeStatusLabel(node);
+            var statusWidth = GetTreeStatusStyle().CalcSize(statusContent).x;
+            var statusRect = new Rect(nameRect.xMax - statusWidth, rowRect.y, statusWidth, rowRect.height);
+            nameRect.width = Mathf.Max(0f, nameRect.width - statusWidth - 6f);
+
+            var icon = EditorGUIUtility.IconContent("GameObject Icon").image;
+            if (icon != null)
+            {
+                GUI.DrawTexture(iconRect, icon);
+            }
+
+            EditorGUI.LabelField(nameRect, BuildTreeLabel(node), EditorStyles.label);
+            EditorGUI.LabelField(statusRect, statusContent, GetTreeStatusStyle());
+            if (Event.current.type == EventType.MouseDown && rowRect.Contains(Event.current.mousePosition))
+            {
+                Selection.activeGameObject = node.Value.gameObject;
+                EditorGUIUtility.PingObject(node.Value.gameObject);
+                Event.current.Use();
+            }
+
+            var children = node.Children.ToArray();
+            for (var i = 0; i < children.Length; i++)
+            {
+                var childParentHasNextSiblings = parentHasNextSiblings.ToList();
+                childParentHasNextSiblings.Add(i < children.Length - 1);
+                DrawInventoryTreeNode(children[i], selectedNode, childParentHasNextSiblings);
+            }
+        }
+
+        private static void DrawTreeLines(Rect rowRect, IReadOnlyList<bool> parentHasNextSiblings, float indentWidth,
+            float lineCenterOffset)
+        {
+            if (parentHasNextSiblings.Count == 0)
+            {
+                return;
+            }
+
+            var lineColor = EditorGUIUtility.isProSkin
+                ? new Color(1f, 1f, 1f, 0.18f)
+                : new Color(0f, 0f, 0f, 0.16f);
+            var centerY = rowRect.y + rowRect.height / 2f;
+
+            for (var i = 0; i < parentHasNextSiblings.Count; i++)
+            {
+                var x = rowRect.x + i * indentWidth + lineCenterOffset;
+                var isCurrentLevel = i == parentHasNextSiblings.Count - 1;
+                var hasNextSibling = parentHasNextSiblings[i];
+
+                if (!isCurrentLevel && !hasNextSibling)
+                {
+                    continue;
+                }
+
+                var yMin = rowRect.y - 2f;
+                var yMax = rowRect.yMax + 2f;
+                if (isCurrentLevel && !hasNextSibling)
+                {
+                    yMax = centerY;
+                }
+
+                EditorGUI.DrawRect(new Rect(x, yMin, 1f, yMax - yMin), lineColor);
+            }
+
+            var branchX = rowRect.x + (parentHasNextSiblings.Count - 1) * indentWidth + lineCenterOffset;
+            EditorGUI.DrawRect(new Rect(branchX, centerY, indentWidth - 3f, 1f), lineColor);
+        }
+
+        private static GUIStyle GetTreeStatusStyle()
+        {
+            var style = new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleRight
+            };
+            style.normal.textColor = EditorGUIUtility.isProSkin
+                ? new Color(1f, 1f, 1f, 0.45f)
+                : new Color(0f, 0f, 0f, 0.45f);
+            return style;
+        }
+
+        private static GUIContent BuildTreeLabel(InventoryNode node)
+        {
+            var name = string.IsNullOrWhiteSpace(node.Value.Name) ? node.Value.gameObject.name : node.Value.Name;
+            return new GUIContent(name);
+        }
+
+        private static GUIContent BuildTreeStatusLabel(InventoryNode node)
+        {
+            var statuses = new List<string>();
+            if (node.Value.IsUnique)
+            {
+                statuses.Add(L.Get("structureUnique"));
+            }
+
+            if (node.Value.Default)
+            {
+                statuses.Add(L.Get("structureDefault"));
+            }
+
+            return new GUIContent(string.Join(" · ", statuses));
         }
 
         private void DrawInventorySettings(InventoryNode node)
