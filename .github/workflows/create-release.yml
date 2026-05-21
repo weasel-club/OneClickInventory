@@ -24,14 +24,19 @@ jobs:
           VERSION=$(echo "${{ github.ref_name }}")
           mkdir output
           zip -r "output/OneClickInventory-${VERSION}.zip" . \
-            -x .git/* \
-            -x .github/* \
-            -x output/* \
-            -x package.json.tmp \
-            -x Editor/Tests.meta \
-            -x Editor/Tests/* \
-            -x scripts.meta \
-            -x scripts/*
+            -x '.git/' \
+            -x '.git/*' \
+            -x '.github/' \
+            -x '.github/*' \
+            -x 'output/' \
+            -x 'output/*' \
+            -x 'package.json.tmp' \
+            -x 'Editor/Tests/' \
+            -x 'Editor/Tests.meta' \
+            -x 'Editor/Tests/*' \
+            -x 'scripts/' \
+            -x 'scripts.meta' \
+            -x 'scripts/*'
 
       - name: Make unitypackage
         uses: weasel-club/unitypackage-release-action@v1
