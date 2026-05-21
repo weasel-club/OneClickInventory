@@ -9,7 +9,7 @@
   "isUnique": "Only one item active",
   "isUniqueTooltip": "Only one child item can be active at a time. Use this for outfits, hair, or other exclusive choices.",
   "name": "Name",
-  "nameTooltip": "The menu label and generated parameter path for this inventory item.",
+  "nameTooltip": "The menu label and generated parameter path for this inventory item. Leave empty to use the GameObject name.",
   "defaultUnique": "Set as default item of inventory",
   "default": "Set enabled by default",
   "defaultTooltip": "Enable this item when the avatar is reset. In a unique inventory, this also becomes the default selected item.",

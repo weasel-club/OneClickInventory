@@ -9,7 +9,7 @@
   "isUnique": "僅啟用一件物品",
   "isUniqueTooltip": "同一時間只啟用一個子物品。適合衣服、髮型等互斥選項。",
   "name": "名稱",
-  "nameTooltip": "用於選單顯示名稱與產生的參數路徑。",
+  "nameTooltip": "用於選單顯示名稱與產生的參數路徑。留空時會使用 GameObject 名稱。",
   "defaultUnique": "設為預設物品",
   "default": "預設啟用",
   "defaultTooltip": "重設角色時啟用此物品。若上層物件庫為單選，這也會成為預設選取物品。",

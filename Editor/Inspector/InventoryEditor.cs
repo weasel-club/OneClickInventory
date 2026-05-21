@@ -192,11 +192,6 @@ namespace Goorm.OneClickInventory
 
         private void DrawWarnings(InventoryNode node)
         {
-            if (string.IsNullOrWhiteSpace(Name.stringValue))
-            {
-                EditorGUILayout.HelpBox(L.Get("emptyNameWarning"), MessageType.Warning);
-            }
-
             foreach (var warning in GetBlendShapeWarnings())
             {
                 EditorGUILayout.HelpBox(warning, MessageType.Warning);
@@ -212,7 +207,7 @@ namespace Goorm.OneClickInventory
         {
             EditorGUILayout.Space();
             EditorGUILayout.LabelField(L.Get("menu"), InventoryEditorUtil.HeaderStyle);
-            EditorGUILayout.PropertyField(Name, Content("name"));
+            DrawNameField();
             AssetPreview.GetAssetPreview(Inventory.Icon);
             EditorGUILayout.LabelField(Content("customIcon"));
             EditorGUILayout.BeginHorizontal();
@@ -231,6 +226,49 @@ namespace Goorm.OneClickInventory
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawNameField()
+        {
+            var content = Content("name");
+            var rect = EditorGUILayout.GetControlRect();
+            using (new EditorGUI.PropertyScope(rect, content, Name))
+            {
+                var fieldRect = EditorGUI.PrefixLabel(rect, content);
+                using var changeCheck = new EditorGUI.ChangeCheckScope();
+                EditorGUI.showMixedValue = Name.hasMultipleDifferentValues;
+                var value = EditorGUI.TextField(fieldRect, Name.stringValue);
+                EditorGUI.showMixedValue = false;
+                if (changeCheck.changed)
+                {
+                    Name.stringValue = value;
+                }
+
+                DrawNamePlaceholder(fieldRect);
+            }
+        }
+
+        private void DrawNamePlaceholder(Rect fieldRect)
+        {
+            if (Name.hasMultipleDifferentValues || !string.IsNullOrEmpty(Name.stringValue)) return;
+            if (Event.current.type != EventType.Repaint) return;
+
+            var placeholder = Inventory.gameObject != null ? Inventory.gameObject.name : "";
+            if (string.IsNullOrWhiteSpace(placeholder)) return;
+
+            var placeholderColor = EditorGUIUtility.isProSkin
+                ? new Color(1f, 1f, 1f, 0.35f)
+                : new Color(0f, 0f, 0f, 0.35f);
+            var style = new GUIStyle(EditorStyles.label)
+            {
+                padding = new RectOffset(3, 3, 0, 0),
+                alignment = TextAnchor.MiddleLeft,
+            };
+            style.normal.textColor = placeholderColor;
+            style.hover.textColor = placeholderColor;
+            style.active.textColor = placeholderColor;
+            style.focused.textColor = placeholderColor;
+            GUI.Label(fieldRect, new GUIContent(placeholder), style);
         }
 
         private void DrawDefaultIconPickerButton()

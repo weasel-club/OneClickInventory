@@ -46,13 +46,10 @@ namespace Goorm.OneClickInventory.Tests
         }
 
         [Test]
-        public void ResetInitializesInventoryName()
+        public void InventoryName_UsesObjectNameWhenSerializedNameStartsEmpty()
         {
             var inventoryObject = CreateChild("Named Object", Avatar.transform);
             var inventory = inventoryObject.AddComponent<Inventory>();
-
-            typeof(Inventory).GetMethod("Reset", BindingFlags.Instance | BindingFlags.NonPublic)
-                .Invoke(inventory, null);
 
             Assert.That(inventory.Name, Is.EqualTo("Named Object"));
         }
@@ -69,6 +66,19 @@ namespace Goorm.OneClickInventory.Tests
                 .Invoke(inventory, null);
 
             Assert.That(inventory.Name, Is.EqualTo("Hat (1)"));
+        }
+
+        [Test]
+        public void InventoryName_UsesObjectNameWhenSerializedNameIsEmpty()
+        {
+            var inventoryObject = CreateChild("Hat", Avatar.transform);
+            var inventory = inventoryObject.AddComponent<Inventory>();
+            SetSerializedValue(inventory, "_name", "");
+
+            typeof(Inventory).GetMethod("OnValidate", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(inventory, null);
+
+            Assert.That(inventory.Name, Is.EqualTo("Hat"));
         }
 
         [Test]

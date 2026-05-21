@@ -108,12 +108,6 @@ namespace Goorm.OneClickInventory.runtime
 
         public bool IntegrateMenuInstaller => _integrateMenuInstaller;
 
-        private void Reset()
-        {
-            _name = gameObject.name;
-            _lastSyncedObjectName = gameObject.name;
-        }
-
         private void OnValidate()
         {
             SyncAutoName();
@@ -122,6 +116,7 @@ namespace Goorm.OneClickInventory.runtime
         private void SyncAutoName()
         {
             if (!gameObject) return;
+            if (string.IsNullOrWhiteSpace(_name)) return;
 
             if (ShouldUseObjectName(_name, _lastSyncedObjectName, gameObject.name))
             {
