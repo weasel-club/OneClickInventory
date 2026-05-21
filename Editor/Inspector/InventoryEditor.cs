@@ -183,7 +183,7 @@ namespace Goorm.OneClickInventory
             DrawItemSettings(node);
             DrawAvatarSection(node);
             EditorGUILayout.Space(12f);
-            InventoryEditorUtil.Footer(true);
+            InventoryEditorUtil.Footer(true, HasLegacyItemOptions(), DrawLegacyItemOptions);
             DrawImmediateTooltip();
 
             serializedObject.ApplyModifiedProperties();
@@ -540,13 +540,11 @@ namespace Goorm.OneClickInventory
                 EditorGUILayout.PropertyField(IntegrateMenuInstaller, Content("integrateMenuInstaller"));
             }
 
-            DrawLegacyItemOptions();
             DrawItemActionButtons();
         }
 
-        private void DrawLegacyItemOptions()
+        private void DrawLegacyItemOptions(bool showLegacyOptions)
         {
-            var showLegacyOptions = InventoryEditorUtil.ShowLegacyOptions;
             if (!showLegacyOptions && !HasLegacyItemOptions()) return;
 
             EditorGUILayout.Space();

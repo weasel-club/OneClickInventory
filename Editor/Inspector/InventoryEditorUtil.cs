@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -45,25 +46,41 @@ namespace Goorm.OneClickInventory
             EditorGUILayout.Space(4f);
         }
 
-        public static void Footer(bool showLegacyOptionsToggle = false)
+        public static void Footer(bool showLegacyOptionsToggle = false, bool forceShowLegacyOptions = false,
+            Action<bool> drawLegacyOptions = null)
         {
             if (!showLegacyOptionsToggle) return;
 
             EditorGUILayout.Space();
             var showEtc = EditorPrefs.GetBool(EtcFoldoutKey, false);
-            var nextShowEtc = EditorGUILayout.Foldout(showEtc, Content("etc"), true);
-            if (nextShowEtc != showEtc)
+            var displayedShowEtc = EditorGUILayout.Foldout(showEtc || forceShowLegacyOptions, Content("etc"), true);
+            var nextShowEtc = forceShowLegacyOptions || displayedShowEtc;
+            if (!forceShowLegacyOptions && nextShowEtc != showEtc)
             {
                 EditorPrefs.SetBool(EtcFoldoutKey, nextShowEtc);
             }
 
             if (!nextShowEtc) return;
 
-            var showLegacyOptions = EditorGUILayout.Toggle(Content("showLegacyOptions"), ShowLegacyOptions);
+            bool showLegacyOptions;
+            using (new EditorGUI.DisabledScope(forceShowLegacyOptions))
+            {
+                showLegacyOptions =
+                    EditorGUILayout.Toggle(Content("showLegacyOptions"), forceShowLegacyOptions || ShowLegacyOptions);
+            }
+
+            if (forceShowLegacyOptions)
+            {
+                drawLegacyOptions?.Invoke(true);
+                return;
+            }
+
             if (showLegacyOptions != ShowLegacyOptions)
             {
                 EditorPrefs.SetBool(ShowLegacyOptionsKey, showLegacyOptions);
             }
+
+            drawLegacyOptions?.Invoke(showLegacyOptions);
         }
 
         private static GUIStyle BannerTitleStyle => new(EditorStyles.boldLabel) { fontSize = 14 };
