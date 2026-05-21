@@ -28,73 +28,12 @@ namespace Goorm.OneClickInventory
             }
         }
 
-        private static Dictionary<string, ParameterConfig> GetMaParameterConfigs(InventoryNode node,
-            Dictionary<string, ParameterConfig> configs = null)
-        {
-            configs ??= new Dictionary<string, ParameterConfig>();
-
-            if (node.IsItem)
-            {
-                foreach (var parameterName in node.Value.GetComponents<InventoryActiveParameter>()
-                             .Select(e => e.ParameterName)
-                             .Where(e => !string.IsNullOrWhiteSpace(e))
-                             .Distinct())
-                {
-                    configs[parameterName] = new ParameterConfig
-                    {
-                        nameOrPrefix = parameterName,
-                        syncType = ParameterSyncType.Bool,
-                        defaultValue = 0,
-                        saved = false,
-                        localOnly = true
-                    };
-                }
-
-                configs[node.ParameterName] = new ParameterConfig
-                {
-                    nameOrPrefix = node.ParameterName,
-                    syncType = ParameterSyncType.Int,
-                    defaultValue = 0,
-                    saved = false,
-                    localOnly = true
-                };
-
-                configs[AnimationGenerator.GetSyncedParameterName(node.ParameterName)] = new ParameterConfig
-                {
-                    nameOrPrefix = AnimationGenerator.GetSyncedParameterName(node.ParameterName),
-                    syncType = ParameterSyncType.Bool,
-                    defaultValue = 0,
-                    saved = false,
-                    localOnly = true
-                };
-
-                foreach (var (name, defaultValue) in AnimationGenerator.Encode(node.ParameterName, node.ParameterBits,
-                             node.ParameterDefault))
-                {
-                    var saved = node.ParentIsUnique ? node.Parent.Value.Saved : node.Value.Saved;
-
-                    configs[name] =
-                        new ParameterConfig
-                        {
-                            nameOrPrefix = name,
-                            syncType = ParameterSyncType.Bool,
-                            defaultValue = defaultValue,
-                            saved = saved,
-                            localOnly = false
-                        };
-                }
-            }
-
-            return node.Children.Aggregate(configs, (current, child) => GetMaParameterConfigs(child, current));
-        }
-
         private static void CreateMaParameters(InventoryNode node)
         {
             var parametersObject = new GameObject("Parameters");
             parametersObject.transform.SetParent(node.Root.Value.transform, false);
             var parameters = parametersObject.AddComponent<ModularAvatarParameters>();
-            var configs = GetMaParameterConfigs(node);
-            parameters.parameters = configs.Values.ToList();
+            parameters.parameters = InventoryParameterConfigFactory.GetParameterConfigs(node).ToList();
         }
 
         public static void Generate(VRCAvatarDescriptor avatar)

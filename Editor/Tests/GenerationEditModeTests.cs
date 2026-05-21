@@ -1,6 +1,7 @@
 using System.Linq;
 using Goorm.OneClickInventory.runtime;
 using nadena.dev.modular_avatar.core;
+using nadena.dev.ndmf;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -294,6 +295,31 @@ namespace Goorm.OneClickInventory.Tests
             Assert.That(parameter.saved, Is.False);
             Assert.That(parameter.localOnly, Is.True);
             Assert.That(Avatar.GetComponentInChildren<InventoryActiveParameter>(true), Is.Null);
+        }
+
+        [Test]
+        public void ParameterProvider_ReportsGeneratedInventoryParametersBeforeGeneration()
+        {
+            var rootInventory = AddInventory(CreateChild("Root", Avatar.transform), "Root");
+            SetSerializedValue(rootInventory, "_isUnique", true);
+            var defaultObject = CreateChild("Default", rootInventory.transform);
+            AddInventory(defaultObject, "Default");
+            AddActiveParameter(defaultObject, "DefaultActive");
+            AddInventory(CreateChild("Second", rootInventory.transform), "Second");
+
+            var parameters = ParameterInfo.ForUI.GetParametersForObject(Avatar.gameObject).ToArray();
+
+            Assert.That(parameters.Select(e => e.EffectiveName),
+                Has.Member("OCInv/Root")
+                    .And.Member("OCInv/Root/Synced")
+                    .And.Member("OCInv/Root/Bits/0")
+                    .And.Member("DefaultActive"));
+            Assert.That(parameters.Single(e => e.EffectiveName == "OCInv/Root").ParameterType,
+                Is.EqualTo(AnimatorControllerParameterType.Int));
+            Assert.That(parameters.Single(e => e.EffectiveName == "OCInv/Root/Bits/0").BitUsage,
+                Is.EqualTo(1));
+            Assert.That(parameters.Single(e => e.EffectiveName == "DefaultActive").BitUsage,
+                Is.EqualTo(0));
         }
 
         [Test]

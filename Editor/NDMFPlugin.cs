@@ -1,4 +1,5 @@
 using nadena.dev.ndmf;
+using nadena.dev.ndmf.vrchat;
 using UnityEngine;
 using Goorm.OneClickInventory.runtime;
 
@@ -8,6 +9,9 @@ namespace Goorm.OneClickInventory
 {
     public class NDMFPlugin : Plugin<NDMFPlugin>
     {
+        public override string QualifiedName => "goorm.one-click-inventory";
+        public override string DisplayName => "One Click Inventory";
+
         private static void ClearComponents<T>(Transform t) where T : Component
         {
             foreach (var e in t.GetComponentsInChildren<T>(true))
@@ -26,7 +30,7 @@ namespace Goorm.OneClickInventory
             InPhase(BuildPhase.Generating)
                 .BeforePlugin("nadena.dev.modular-avatar")
                 .BeforePlugin("ShellProtectorNDMFPlugin")
-                .Run("Generating inventory", ctx => { Generator.Generate(ctx.AvatarDescriptor); });
+                .Run("Generating inventory", ctx => { Generator.Generate(ctx.VRChatAvatarDescriptor()); });
         }
     }
 }
