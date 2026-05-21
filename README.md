@@ -1,24 +1,22 @@
-This tool allows create VRChat inventory without any knowledge of Unity animation.
+# One Click Inventory
 
-유니티 애니메이션에 대한 지식 없이 VRChat 옷장 시스템을 만들 수 있습니다.
+Create VRChat inventory menus without writing Unity animation setup by hand.
+
+유니티 애니메이션 설정을 직접 다루지 않고 VRChat 옷장 메뉴를 만들 수 있습니다.
 
 ### Documentation
 
-https://inventory.goorm.me
+https://goorm.me/docs/one-click-inventory
 
 ### Features
 
-- Simple settings for inventory system
-- Features for advanced use-case
-- Automatically generate icon
+- Simple inventory menu setup
+- Advanced options for custom use cases
+- Automatic icon generation
 
 ### Licenses
 
-Some icon assets are created by Freepik of Flaticon.
-
-- https://www.flaticon.com/free-icons/fashion
-
-All other files are under MIT License.
+MIT License.
 
 ### Author / Contributors
 
