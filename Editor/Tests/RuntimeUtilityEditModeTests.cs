@@ -170,6 +170,19 @@ namespace Goorm.OneClickInventory.Tests
             }
         }
 
+        [Test]
+        public void DocumentationUrl_FollowsSupportedLanguageAndFallsBackToEnglish()
+        {
+            Assert.That(InventoryEditorUtil.DocumentationUrl("ko"),
+                Is.EqualTo("https://goorm.me/ko/docs/one-click-inventory"));
+            Assert.That(InventoryEditorUtil.DocumentationUrl("en"),
+                Is.EqualTo("https://goorm.me/en/docs/one-click-inventory"));
+            Assert.That(InventoryEditorUtil.DocumentationUrl("ja"),
+                Is.EqualTo("https://goorm.me/ja/docs/one-click-inventory"));
+            Assert.That(InventoryEditorUtil.DocumentationUrl("zh-Hant"),
+                Is.EqualTo("https://goorm.me/en/docs/one-click-inventory"));
+        }
+
         private static IEnumerable<string> ReadLocalizationKeys(string localizationPath, string language)
         {
             var filename = Path.Combine(localizationPath, $"{language}.json");

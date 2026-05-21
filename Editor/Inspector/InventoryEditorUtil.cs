@@ -9,7 +9,6 @@ namespace Goorm.OneClickInventory
     {
         private const string EtcFoldoutKey = "one-click-inventory.etc-foldout";
         private const string ShowLegacyOptionsKey = "one-click-inventory.show-legacy-options";
-        private const string DocumentationUrl = "https://goorm.me/docs/one-click-inventory";
 
         public static GUIStyle HeaderStyle => new(EditorStyles.boldLabel);
         public static GUIStyle DescriptionStyle => new(EditorStyles.label) { wordWrap = true };
@@ -25,6 +24,16 @@ namespace Goorm.OneClickInventory
         public static GUIContent Content(string key, string tooltipKey)
         {
             return new GUIContent(L.Get(key), L.Get(tooltipKey));
+        }
+
+        public static string DocumentationUrl(string language)
+        {
+            return language switch
+            {
+                "ko" => "https://goorm.me/ko/docs/one-click-inventory",
+                "ja" => "https://goorm.me/ja/docs/one-click-inventory",
+                _ => "https://goorm.me/en/docs/one-click-inventory"
+            };
         }
 
         public static void Banner()
@@ -119,7 +128,7 @@ namespace Goorm.OneClickInventory
 
             if (isHover && Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
-                Application.OpenURL(DocumentationUrl);
+                Application.OpenURL(DocumentationUrl(L.Language));
                 Event.current.Use();
             }
         }
