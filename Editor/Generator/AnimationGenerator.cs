@@ -378,7 +378,6 @@ namespace Goorm.OneClickInventory
             SetupDecoder(controller, node.ParameterName, 1, 1);
 
             EditorUtility.SetDirty(controller);
-            AssetDatabase.SaveAssets();
             return controller;
         }
 
@@ -465,7 +464,6 @@ namespace Goorm.OneClickInventory
             SetupDecoder(controller, node.Key, node.ChildrenBits, node.MaxChildrenIndex);
 
             EditorUtility.SetDirty(controller);
-            AssetDatabase.SaveAssets();
             return controller;
         }
 

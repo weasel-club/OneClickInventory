@@ -38,28 +38,36 @@ namespace Goorm.OneClickInventory
 
         public static void Generate(VRCAvatarDescriptor avatar)
         {
-            // Resolve root nodes
-            var rootNodes = InventoryNode.ResolveRootNodes(avatar).ToArray();
-
-            MenuGenerator.Generate(avatar, rootNodes);
-            foreach (var node in rootNodes)
+            AssetUtil.BeginBatchEdit();
+            try
             {
-                // Generate animation
-                var controllers = AnimationGenerator.GenerateControllers(node);
-                CreateMaMergeAnimator(node, controllers);
+                // Resolve root nodes
+                var rootNodes = InventoryNode.ResolveRootNodes(avatar).ToArray();
 
-                // Generate parameters
-                CreateMaParameters(node);
-            }
-
-            // Remove Inventory components
-            var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryActiveParameter) };
-            foreach (var type in types)
-            {
-                foreach (var component in avatar.GetComponentsInChildren(type, true))
+                MenuGenerator.Generate(avatar, rootNodes);
+                foreach (var node in rootNodes)
                 {
-                    Object.DestroyImmediate(component);
+                    // Generate animation
+                    var controllers = AnimationGenerator.GenerateControllers(node);
+                    CreateMaMergeAnimator(node, controllers);
+
+                    // Generate parameters
+                    CreateMaParameters(node);
                 }
+
+                // Remove Inventory components
+                var types = new[] { typeof(Inventory), typeof(InventoryMenuInstaller), typeof(InventoryActiveParameter) };
+                foreach (var type in types)
+                {
+                    foreach (var component in avatar.GetComponentsInChildren(type, true))
+                    {
+                        Object.DestroyImmediate(component);
+                    }
+                }
+            }
+            finally
+            {
+                AssetUtil.EndBatchEdit();
             }
         }
     }

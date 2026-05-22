@@ -5,6 +5,7 @@ using UnityEngine;
 public class AssetUtil
 {
     private static readonly string _generatedPathGuid = "6385f8da0e893d142aaaef7ed709f4bd";
+    private static int _batchDepth;
 
     private static string GeneratedPathRoot
     {
@@ -32,8 +33,33 @@ public class AssetUtil
         if (!Directory.Exists(directoryPath))
         {
             Directory.CreateDirectory(directoryPath);
-            AssetDatabase.Refresh();
+            if (_batchDepth == 0)
+            {
+                AssetDatabase.Refresh();
+            }
         }
+    }
+
+    public static void BeginBatchEdit()
+    {
+        if (_batchDepth == 0)
+        {
+            AssetDatabase.StartAssetEditing();
+        }
+
+        _batchDepth++;
+    }
+
+    public static void EndBatchEdit()
+    {
+        if (_batchDepth == 0) return;
+
+        _batchDepth--;
+        if (_batchDepth != 0) return;
+
+        AssetDatabase.StopAssetEditing();
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 
     public static string GetPath(string key)
