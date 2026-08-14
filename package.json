@@ -16,5 +16,8 @@
   "vpmDependencies": {
     "nadena.dev.ndmf": ">=1.11.0",
     "nadena.dev.modular-avatar": ">=1.14.0"
+  },
+  "legacyFolders": {
+    "Assets\\OneClickInventory": ""
   }
 }
